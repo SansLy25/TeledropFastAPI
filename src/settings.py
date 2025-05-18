@@ -1,5 +1,4 @@
 import secrets
-from os import getenv
 
 from pydantic import BaseSettings, PostgresDsn
 from dotenv import load_dotenv
