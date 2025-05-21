@@ -1,18 +1,26 @@
 import logging
 import time
-from fastapi import FastAPI, Request, APIRouter
+
+from fastapi import FastAPI, Request, APIRouter, middleware
 
 from core.db import init_db
 from settings import settings
 from telegram_bot.bot import bot
 from telegram_bot.views import bot_rt
 
-main_router = APIRouter(prefix='/api')
-main_router.include_router(bot_rt)
-app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
-app.include_router(main_router)
+
 logging.basicConfig(level=logging.INFO)
 
+app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
+
+
+def create_main_router():
+    router = APIRouter(prefix='/api')
+    router.include_router(bot_rt)
+    return router
+
+
+app.include_router(create_main_router())
 
 
 async def register_webhook():
