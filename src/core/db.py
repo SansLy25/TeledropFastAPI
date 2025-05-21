@@ -1,13 +1,15 @@
-import os
-
-from sqlmodel import SQLModel, create_engine
+from fastapi.params import Depends
+from sqlalchemy.sql.annotation import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
-from src.settings import settings
+from settings import settings
+from users.models import *
 
-engine = AsyncEngine(create_engine(settings.DATABASE_URL, echo=True, future=True))
+
+engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True)
+
 
 async def init_db():
     async with engine.begin() as conn:
@@ -20,3 +22,6 @@ async def get_session() -> AsyncSession:
     )
     async with async_session() as session:
         yield session
+
+
+SessionDp = Annotated[AsyncSession, Depends(get_session)]

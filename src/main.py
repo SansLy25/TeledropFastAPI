@@ -1,12 +1,51 @@
-from fastapi import FastAPI
+import logging
+import time
+from fastapi import FastAPI, Request, APIRouter
 
+from core.db import init_db
+from settings import settings
+from telegram_bot.bot import bot
+from telegram_bot.views import bot_rt
+
+main_router = APIRouter(prefix='/api')
+main_router.include_router(bot_rt)
 app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+app.include_router(main_router)
+logging.basicConfig(level=logging.INFO)
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+
+async def register_webhook():
+    webhook_info = await bot.get_webhook_info()
+    full_url = settings.HOST_NAME + "/api/telegram/bot/webhook"
+    if webhook_info.url != full_url:
+        await bot.set_webhook(
+            url=full_url,
+            drop_pending_updates=True
+        )
+    logging.info("BOT STARTED")
+
+
+async def unregister_webhook():
+    await bot.delete_webhook()
+    logging.info("BOT STOPPED, WEBHOOK DELETED")
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+
+@app.on_event("startup")
+async def start():
+    await init_db()
+    await register_webhook()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await unregister_webhook()
