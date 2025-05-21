@@ -23,12 +23,12 @@ async def register_webhook():
             url=full_url,
             drop_pending_updates=True
         )
-    logging.info("BOT STARTED")
+    logging.info("Bot started")
 
 
 async def unregister_webhook():
     await bot.delete_webhook()
-    logging.info("BOT STOPPED, WEBHOOK DELETED")
+    logging.info("Bot stopped, webhook deleted")
 
 
 @app.middleware("http")
