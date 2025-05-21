@@ -1,4 +1,5 @@
 import http
+from typing import Annotated
 
 from fastapi import Depends
 from fastapi import HTTPException
@@ -11,6 +12,8 @@ from telegram_webapp_auth.auth import generate_secret_key
 from telegram_webapp_auth.errors import InvalidInitDataError
 
 from settings import settings
+from users.models import User
+
 
 telegram_authentication_schema = HTTPBase()
 
@@ -29,18 +32,21 @@ def get_current_user(
     except InvalidInitDataError:
         raise HTTPException(
             status_code=http.HTTPStatus.FORBIDDEN,
-            detail="Доступ запрещен.",
+            detail="Access denied.",
         )
     except Exception:
         raise HTTPException(
             status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Ошибка сервера.",
+            detail="Server error.",
         )
 
     if init_data.user is None:
         raise HTTPException(
             status_code=http.HTTPStatus.FORBIDDEN,
-            detail="Доступ запрещен.",
+            detail="Access denied.",
         )
 
     return init_data.user
+
+
+UserDp = Annotated[User, Depends(get_current_user)]

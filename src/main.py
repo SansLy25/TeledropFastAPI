@@ -26,11 +26,14 @@ app.include_router(create_main_router())
 async def register_webhook():
     webhook_info = await bot.get_webhook_info()
     full_url = settings.HOST_NAME + "/api/telegram/bot/webhook"
+
     if webhook_info.url != full_url:
         await bot.set_webhook(
             url=full_url,
-            drop_pending_updates=True
+            drop_pending_updates=True,
+            secret_token=settings.SECRET_KEY,
         )
+
     logging.info("Bot started")
 
 
@@ -50,6 +53,7 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.on_event("startup")
 async def start():
+    print(settings.SECRET_KEY)
     await init_db()
     await register_webhook()
 
