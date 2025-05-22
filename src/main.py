@@ -2,11 +2,13 @@ import logging
 import time
 
 from fastapi import FastAPI, Request, APIRouter, middleware
+from fastapi.openapi.models import SecuritySchemeType
 
 from core.db import init_db
 from settings import settings
 from telegram_bot.bot import bot
 from telegram_bot.views import bot_rt
+from users.views import user_rt
 
 
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +19,7 @@ app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 def create_main_router():
     router = APIRouter(prefix='/api')
     router.include_router(bot_rt)
+    router.include_router(user_rt)
     return router
 
 
@@ -53,7 +56,6 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.on_event("startup")
 async def start():
-    print(settings.SECRET_KEY)
     await init_db()
     await register_webhook()
 

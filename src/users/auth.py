@@ -1,10 +1,11 @@
 import http
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi import HTTPException
-from fastapi.security.http import HTTPAuthorizationCredentials
-from fastapi.security.http import HTTPBase
+from fastapi.security import HTTPBasic, APIKeyHeader
+from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer, \
+    HTTPBase
 
 from telegram_webapp_auth.auth import TelegramAuthenticator
 from telegram_webapp_auth.auth import WebAppUser
@@ -15,29 +16,40 @@ from settings import settings
 from users.models import User
 
 
-telegram_authentication_schema = HTTPBase()
+class TMAAuth(APIKeyHeader):
+    async def __call__(self, request: Request) -> str:
+        auth_header = await super().__call__(request)
+        if not auth_header:
+            raise HTTPException(403, "Auth header not provided.")
+
+        if len(auth_header.split()) != 2:
+            raise HTTPException(403, "Auth creds incorrect.")
+
+        return auth_header.split()[1]
+
+
+telegram_authentication_schema = TMAAuth(scheme_name="tma",
+                                         description="Authorization based on Telegram Init Data",
+                                         name="Authorization")
 
 
 def get_telegram_authenticator() -> TelegramAuthenticator:
-    secret_key = generate_secret_key(settings.BOT_SECRET_KEY)
+    secret_key = generate_secret_key(settings.TELEGRAM_BOT_TOKEN)
     return TelegramAuthenticator(secret_key)
 
 
 def get_current_user(
-    auth_cred: HTTPAuthorizationCredentials = Depends(telegram_authentication_schema),
-    telegram_authenticator: TelegramAuthenticator = Depends(get_telegram_authenticator),
+        auth_cred: str = Depends(
+            telegram_authentication_schema),
+        telegram_authenticator: TelegramAuthenticator = Depends(
+            get_telegram_authenticator),
 ) -> WebAppUser:
     try:
-        init_data = telegram_authenticator.validate(auth_cred.credentials)
-    except InvalidInitDataError:
+        init_data = telegram_authenticator.validate(auth_cred)
+    except InvalidInitDataError as e:
         raise HTTPException(
             status_code=http.HTTPStatus.FORBIDDEN,
             detail="Access denied.",
-        )
-    except Exception:
-        raise HTTPException(
-            status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Server error.",
         )
 
     if init_data.user is None:
