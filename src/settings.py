@@ -23,6 +23,7 @@ class Settings(BaseSettings):
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             port=5432,
+            path=f"{self.POSTGRES_DB}",
         ))
 
     class Config:

@@ -1,8 +1,8 @@
-from fastapi import HTTPException
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+from telegram_webapp_auth.data import WebAppUser
 
-from models import User
+from users.models import User
 
 
 class UserService:
@@ -11,30 +11,27 @@ class UserService:
         return await session.get(User, user_id)
 
     @staticmethod
+    async def get_by_tg_id(*, session: AsyncSession, tg_id: int) -> User | None:
+        stmt = select(User).where(User.telegram_id == tg_id)
+        result = await session.execute(stmt)
+        return result.scalars().first()
+
+    @staticmethod
     async def create(
             *,
             session: AsyncSession,
-            username: str | None = None,
-            first_name: str | None = None,
-            last_name: str | None = None,
-            telegram_id: int,
-            telegram_username
-    ):
-        try:
-            user = User(
-                username=username,
-                first_name=first_name,
-                last_name=last_name,
-                telegram_id=telegram_id,
-                telegram_username=telegram_username
-            )
+            user_in: WebAppUser
+    ) -> User:
+        telegram_id = user_in.id
+        user_data = user_in.__dict__
 
-        except IntegrityError:
-            raise HTTPException(
-                status_code=409,
-                detail="Пользователь с таким id уже существует"
-            )
+        del user_data["id"]
 
+        for key in user_data:
+            if user_data[key] == '':
+                user_data[key] = None
+
+        user = User.model_validate({**user_data, "telegram_id": telegram_id})
         session.add(user)
         await session.commit()
         return user

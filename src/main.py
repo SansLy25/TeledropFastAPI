@@ -11,7 +11,7 @@ from telegram_bot.views import bot_rt
 from users.views import user_rt
 
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 

@@ -4,8 +4,6 @@ from typing import Annotated
 from fastapi import Depends, Request
 from fastapi import HTTPException
 from fastapi.security import HTTPBasic, APIKeyHeader
-from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer, \
-    HTTPBase
 
 from telegram_webapp_auth.auth import TelegramAuthenticator
 from telegram_webapp_auth.auth import WebAppUser
@@ -14,6 +12,8 @@ from telegram_webapp_auth.errors import InvalidInitDataError
 
 from settings import settings
 from users.models import User
+from users.service import UserService
+from core.db import SessionDp
 
 
 class TMAAuth(APIKeyHeader):
@@ -38,7 +38,7 @@ def get_telegram_authenticator() -> TelegramAuthenticator:
     return TelegramAuthenticator(secret_key)
 
 
-def get_current_user(
+def get_telegram_user_init_data(
         auth_cred: str = Depends(
             telegram_authentication_schema),
         telegram_authenticator: TelegramAuthenticator = Depends(
@@ -46,7 +46,7 @@ def get_current_user(
 ) -> WebAppUser:
     try:
         init_data = telegram_authenticator.validate(auth_cred)
-    except InvalidInitDataError as e:
+    except InvalidInitDataError:
         raise HTTPException(
             status_code=http.HTTPStatus.FORBIDDEN,
             detail="Access denied.",
@@ -61,4 +61,15 @@ def get_current_user(
     return init_data.user
 
 
-UserDp = Annotated[User, Depends(get_current_user)]
+async def get_or_create_user(
+        session: SessionDp,
+        user_init_data: WebAppUser = Depends(get_telegram_user_init_data),
+) -> User:
+    user = await UserService.get_by_tg_id(session=session,
+                                          tg_id=user_init_data.id)
+    if user is None:
+        return await UserService.create(session=session, user_in=user_init_data)
+
+    return user
+
+UserDp = Annotated[User, Depends(get_or_create_user)]

@@ -9,7 +9,12 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    id: int = Field(primary_key=True)
+    __tablename__ = "users"
+    id: Optional[int] = Field(default=None, primary_key=True)
     telegram_id: int = Field(unique=True)
-    telegram_username: int
+    username: Optional[str] = None
+    language_code: Optional[str] = None
+    photo_url: Optional[str] = None
+
+
 
