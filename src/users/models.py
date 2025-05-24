@@ -1,20 +1,18 @@
+from sqlalchemy.orm import Mapped, mapped_column
 from typing import Optional
 
-from sqlmodel import SQLModel, Field
+from core.db import Base
 
 
-class UserBase(SQLModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-
-
-class User(UserBase, table=True):
+class User(Base):
     __tablename__ = "users"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    telegram_id: int = Field(unique=True)
-    username: Optional[str] = None
-    language_code: Optional[str] = None
-    photo_url: Optional[str] = None
 
+    id: Mapped[int] = mapped_column(primary_key=True)
+    telegram_id: Mapped[int] = mapped_column(unique=True)
+    first_name: Mapped[str]
+    last_name: Mapped[Optional[str]]
+    username: Mapped[Optional[str]]
+    language_code: Mapped[Optional[str]]
+    photo_url: Mapped[Optional[str]]
 
 

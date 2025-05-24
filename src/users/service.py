@@ -1,8 +1,9 @@
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from telegram_webapp_auth.data import WebAppUser
 
 from users.models import User
+from users.schemas import UserCreate
 
 
 class UserService:
@@ -11,7 +12,8 @@ class UserService:
         return await session.get(User, user_id)
 
     @staticmethod
-    async def get_by_tg_id(*, session: AsyncSession, tg_id: int) -> User | None:
+    async def get_by_tg_id(*, session: AsyncSession,
+                           tg_id: int) -> User | None:
         stmt = select(User).where(User.telegram_id == tg_id)
         result = await session.execute(stmt)
         return result.scalars().first()
@@ -31,7 +33,9 @@ class UserService:
             if user_data[key] == '':
                 user_data[key] = None
 
-        user = User.model_validate({**user_data, "telegram_id": telegram_id})
+        user = User(**UserCreate.model_validate(
+            {**user_data, "telegram_id": telegram_id}).model_dump())
+
         session.add(user)
         await session.commit()
         return user
