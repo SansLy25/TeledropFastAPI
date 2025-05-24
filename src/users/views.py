@@ -6,6 +6,6 @@ from users.schemas import UserRead
 user_rt = APIRouter(prefix="/users")
 
 
-@user_rt.post("/me", response_model=UserRead, tags=["Users"])
-async def get_me(user: UserDp):
+@user_rt.post("/me", tags=["Пользователи"])
+async def get_me(user: UserDp) -> UserRead:
     return user

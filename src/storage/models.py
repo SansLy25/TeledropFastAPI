@@ -1,11 +1,11 @@
 import mimetypes
+from datetime import datetime
 
 from sqlalchemy import (
     ForeignKey,
     String,
     Text,
     Integer,
-    BigInteger,
     event, Table, Column
 )
 from sqlalchemy.orm import (
@@ -112,7 +112,7 @@ class File(Base):
     @hybrid_property
     def path(self) -> str:
         if self._path_cache is None:
-            self._path_cache = f"{self.parent.path}/{self.name}"
+            self._path_cache = self.parent.path + self.name
         return self._path_cache
 
     @validates("name")
@@ -124,7 +124,7 @@ class File(Base):
     def _detect_file_type(self, filename: str) -> None:
         mime_type, _ = mimetypes.guess_type(filename)
         if mime_type is None:
-            self.type = "other"
+            self.type = "other/other"
         else:
             self.type = mime_type
 
@@ -132,6 +132,7 @@ class File(Base):
 class FileVersion(Base):
     __tablename__ = "file_version"
 
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     version: Mapped[int]
     telegram_file_id: Mapped[int]
@@ -141,7 +142,6 @@ class FileVersion(Base):
 
 
 @event.listens_for(Folder, "before_insert")
-@event.listens_for(Folder, "before_update")
 def _auto_set_folder_owner(mapper, connection, target: Folder):
     if not target.owner_id and target.parent:
         target.owner_id = target.parent.owner_id

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     HOST_NAME: str
 
     @property
-    def DATABASE_URL(self) -> PostgresDsn:
+    def DATABASE_URL(self) -> str:
         return str(PostgresDsn.build(
             scheme="postgresql+asyncpg",
             host=self.POSTGRES_HOST,
