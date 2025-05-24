@@ -36,12 +36,12 @@ async def register_webhook():
             secret_token=settings.SECRET_KEY,
         )
 
-    logging.info("Bot started")
+    logging.info("BOT: Bot started")
 
 
 async def unregister_webhook():
     await bot.delete_webhook()
-    logging.info("Bot stopped, webhook deleted")
+    logging.info("BOT: Bot stopped, webhook deleted")
 
 
 @app.middleware("http")
