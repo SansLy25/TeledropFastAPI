@@ -17,7 +17,6 @@ from sqlalchemy.orm import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from typing import List, Optional
 
-from users.models import User
 from core.db import Base
 
 
