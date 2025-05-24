@@ -1,3 +1,5 @@
+import mimetypes
+
 from sqlalchemy import (
     ForeignKey,
     String,
@@ -42,6 +44,7 @@ class Folder(Base):
     parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("folder.id"),
                                                      nullable=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    is_root: Mapped[bool] = mapped_column(default=False)
     _path_cache: Mapped[Optional[str]] = mapped_column("path", Text,
                                                        nullable=True)
 
@@ -81,10 +84,6 @@ class Folder(Base):
             current = current.parent
         self._path_cache = "/" + "/".join(reversed(segments))
 
-    @hybrid_property
-    def is_root(self) -> bool:
-        return self.parent_id is None
-
     def set_parent_owner(self) -> None:
         if self.parent:
             self.owner_id = self.parent.owner_id
@@ -98,13 +97,11 @@ class File(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
-    telegram_id: Mapped[int] = mapped_column(BigInteger)
-    size: Mapped[int] = mapped_column(Integer)
+    telegram_id: Mapped[int]
     type: Mapped[str] = mapped_column(String(50), default="other")
     parent_id: Mapped[int] = mapped_column(ForeignKey("folder.id"))
     _path_cache: Mapped[Optional[str]] = mapped_column("path", String(1000),
                                                        nullable=True)
-
     parent: Mapped["Folder"] = relationship(back_populates="files")
     versions: Mapped[List["FileVersion"]] = relationship(
         back_populates="file",
@@ -125,30 +122,21 @@ class File(Base):
         return name
 
     def _detect_file_type(self, filename: str) -> None:
-        file_types = getattr(self, "_cached_file_types", None)
-        if file_types is None:
-            self._cached_file_types = [
-                {"type": "image", "extensions": ["jpg", "png", "gif"]},
-                {"type": "document", "extensions": ["pdf", "docx"]},
-            ]
-            file_types = self._cached_file_types
-
-        ext = filename.split(".")[-1].lower() if "." in filename else ""
-        for ft in file_types:
-            if ext in ft["extensions"]:
-                self.type = ft["type"]
-                return
-        self.type = "other"
+        mime_type, _ = mimetypes.guess_type(filename)
+        if mime_type is None:
+            self.type = "other"
+        else:
+            self.type = mime_type
 
 
 class FileVersion(Base):
     __tablename__ = "file_version"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    version: Mapped[int] = mapped_column(Integer)
-    telegram_file_id: Mapped[int] = mapped_column(BigInteger)
+    version: Mapped[int]
+    telegram_file_id: Mapped[int]
     file_id: Mapped[int] = mapped_column(ForeignKey("file.id"))
-
+    size: Mapped[int]
     file: Mapped["File"] = relationship(back_populates="versions")
 
 
