@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request, APIRouter
 
 from core.db import init_db
 from settings import settings
+from storage.views import storage_rt
 from telegram_bot.bot import bot
 from telegram_bot.views import bot_rt
 from users.views import user_rt
@@ -19,6 +20,7 @@ def create_main_router():
     router = APIRouter(prefix='/api')
     router.include_router(bot_rt)
     router.include_router(user_rt)
+    router.include_router(storage_rt)
     return router
 
 

@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from telegram_webapp_auth.data import WebAppUser
 
+from storage.models import Folder
 from users.models import User
 from users.schemas import UserCreate
 
@@ -35,7 +36,8 @@ class UserService:
 
         user = User(**UserCreate.model_validate(
             {**user_data, "telegram_id": telegram_id}).model_dump())
+        root_folder = Folder(name="", owner=user, is_root=True)
 
-        session.add(user)
+        session.add_all([user, root_folder])
         await session.commit()
         return user

@@ -39,7 +39,7 @@ class Folder(Base):
     __tablename__ = "folder"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(200))
+    name: Mapped[Optional[str]] = mapped_column(String(200))
     parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("folder.id"),
                                                      nullable=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
@@ -96,7 +96,6 @@ class File(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
-    telegram_id: Mapped[int]
     type: Mapped[str] = mapped_column(String(50), default="other")
     parent_id: Mapped[int] = mapped_column(ForeignKey("folder.id"))
     _path_cache: Mapped[Optional[str]] = mapped_column("path", String(1000),
