@@ -44,16 +44,17 @@ class Folder(Base):
                                                      nullable=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     is_root: Mapped[bool] = mapped_column(default=False)
-    _path_cache: Mapped[Optional[str]] = mapped_column("path", Text,
+    path: Mapped[Optional[str]] = mapped_column("path", Text,
                                                        nullable=True)
 
     parent: Mapped[Optional["Folder"]] = relationship(
         remote_side=[id],
-        back_populates="folders"
+        back_populates="folders",
     )
     folders: Mapped[List["Folder"]] = relationship(
         back_populates="parent",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     owner: Mapped["User"] = relationship(foreign_keys=[owner_id])
     users_with_editing_access: Mapped[List["User"]] = relationship(
@@ -66,22 +67,9 @@ class Folder(Base):
     )
     files: Mapped[List["File"]] = relationship(
         back_populates="parent",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
-
-    @hybrid_property
-    def path(self) -> str:
-        if self._path_cache is None:
-            self._compute_path()
-        return self._path_cache
-
-    def _compute_path(self) -> None:
-        segments = []
-        current = self
-        while current.parent is not None:
-            segments.append(current.name)
-            current = current.parent
-        self._path_cache = "/" + "/".join(reversed(segments))
 
     def set_parent_owner(self) -> None:
         if self.parent:
@@ -143,6 +131,15 @@ class FileVersion(Base):
 def _auto_set_folder_owner(mapper, connection, target: Folder):
     if not target.owner_id and target.parent:
         target.owner_id = target.parent.owner_id
+
+
+@event.listens_for(Folder, "before_insert")
+@event.listens_for(Folder, "before_update")
+def _auto_set_path(mapper, connection, target: Folder):
+    if target.parent:
+        target.path = target.parent.path + target.name + "/"
+    else:
+        target.path = "/"
 
 
 @event.listens_for(File, "before_insert")

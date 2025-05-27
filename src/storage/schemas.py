@@ -1,8 +1,48 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-
-class FolderSchema(BaseModel):
+class BaseFileFolderSchema(BaseModel):
     id: int
-    name: str
+    name: str = Field(max_length=200)
+
+
+class FileBaseSchema(BaseFileFolderSchema):
+    path: str
+    size: int
+
+
+class FolderBaseSchema(BaseFileFolderSchema):
+    pass
+
+
+class FileNestedSchema(FileBaseSchema):
+    pass
+
+
+class FolderNestedSchema(FolderBaseSchema):
+    pass
+
+
+class FolderReadSchema(FolderBaseSchema):
+    pass
+    files: list[FileNestedSchema] = []
+    folders: list[FolderNestedSchema] = []
     is_root: bool
+    path: str
+    parent_id: int
+
+
+class RootFolderReadSchema(BaseModel):
+    id: int
+    files: list[FileNestedSchema] = []
+    folders: list[FolderNestedSchema] = []
+
+
+class FolderCreate(BaseModel):
+    name: str
+    parent_id: int
+
+
+class FileReadSchema(FileBaseSchema):
+    parent_id: int
+    type: str
