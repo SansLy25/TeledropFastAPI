@@ -17,7 +17,7 @@ app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 
 
 def create_main_router():
-    router = APIRouter(prefix='/api')
+    router = APIRouter(prefix="/api")
     router.include_router(bot_rt)
     router.include_router(user_rt)
     router.include_router(storage_rt)

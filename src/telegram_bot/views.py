@@ -11,8 +11,8 @@ bot_rt = APIRouter(prefix="/telegram/bot")
 
 @bot_rt.post("/webhook")
 async def bot_webhook(
-        update: dict,
-        secret_key_header: str = Header(None, alias="X-Telegram-Bot-Api-Secret-Token")
+    update: dict,
+    secret_key_header: str = Header(None, alias="X-Telegram-Bot-Api-Secret-Token"),
 ):
     if not secret_key_header or secret_key_header != settings.SECRET_KEY:
         raise HTTPException(403, "Secret token invalid.")

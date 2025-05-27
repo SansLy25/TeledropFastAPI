@@ -13,29 +13,27 @@ class UserService:
         return await session.get(User, user_id)
 
     @staticmethod
-    async def get_by_tg_id(*, session: AsyncSession,
-                           tg_id: int) -> User | None:
+    async def get_by_tg_id(*, session: AsyncSession, tg_id: int) -> User | None:
         stmt = select(User).where(User.telegram_id == tg_id)
         result = await session.execute(stmt)
         return result.scalars().first()
 
     @staticmethod
-    async def create(
-            *,
-            session: AsyncSession,
-            user_in: WebAppUser
-    ) -> User:
+    async def create(*, session: AsyncSession, user_in: WebAppUser) -> User:
         telegram_id = user_in.id
         user_data = user_in.__dict__
 
         del user_data["id"]
 
         for key in user_data:
-            if user_data[key] == '':
+            if user_data[key] == "":
                 user_data[key] = None
 
-        user = User(**UserCreate.model_validate(
-            {**user_data, "telegram_id": telegram_id}).model_dump())
+        user = User(
+            **UserCreate.model_validate(
+                {**user_data, "telegram_id": telegram_id}
+            ).model_dump()
+        )
         root_folder = Folder(name="", owner=user, is_root=True)
 
         session.add_all([user, root_folder])

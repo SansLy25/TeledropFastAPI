@@ -1,13 +1,7 @@
 import mimetypes
 from datetime import datetime
 
-from sqlalchemy import (
-    ForeignKey,
-    String,
-    Text,
-    Integer,
-    event, Table, Column
-)
+from sqlalchemy import ForeignKey, String, Text, Integer, event, Table, Column
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -21,17 +15,17 @@ from core.db import Base
 
 
 folder_editing_access = Table(
-    'folder_editing_access',
+    "folder_editing_access",
     Base.metadata,
-    Column('folder_id', ForeignKey('folder.id'), primary_key=True),
-    Column('user_id', ForeignKey('user.id'), primary_key=True)
+    Column("folder_id", ForeignKey("folder.id"), primary_key=True),
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
 )
 
 folder_view_access = Table(
-    'folder_view_access',
+    "folder_view_access",
     Base.metadata,
-    Column('folder_id', ForeignKey('folder.id'), primary_key=True),
-    Column('user_id', ForeignKey('user.id'), primary_key=True)
+    Column("folder_id", ForeignKey("folder.id"), primary_key=True),
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
 )
 
 
@@ -40,12 +34,12 @@ class Folder(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[Optional[str]] = mapped_column(String(200))
-    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("folder.id"),
-                                                     nullable=True)
+    parent_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("folder.id"), nullable=True
+    )
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     is_root: Mapped[bool] = mapped_column(default=False)
-    path: Mapped[Optional[str]] = mapped_column("path", Text,
-                                                       nullable=True)
+    path: Mapped[Optional[str]] = mapped_column("path", Text, nullable=True)
 
     parent: Mapped[Optional["Folder"]] = relationship(
         remote_side=[id],
@@ -58,12 +52,10 @@ class Folder(Base):
     )
     owner: Mapped["User"] = relationship(foreign_keys=[owner_id])
     users_with_editing_access: Mapped[List["User"]] = relationship(
-        secondary=folder_editing_access,
-        back_populates="shared_editable_folders"
+        secondary=folder_editing_access, back_populates="shared_editable_folders"
     )
     users_with_view_access: Mapped[List["User"]] = relationship(
-        secondary=folder_view_access,
-        back_populates="shared_viewable_folders"
+        secondary=folder_view_access, back_populates="shared_viewable_folders"
     )
     files: Mapped[List["File"]] = relationship(
         back_populates="parent",
@@ -86,13 +78,14 @@ class File(Base):
     name: Mapped[str] = mapped_column(String(200))
     type: Mapped[str] = mapped_column(String(50), default="other")
     parent_id: Mapped[int] = mapped_column(ForeignKey("folder.id"))
-    _path_cache: Mapped[Optional[str]] = mapped_column("path", String(1000),
-                                                       nullable=True)
+    _path_cache: Mapped[Optional[str]] = mapped_column(
+        "path", String(1000), nullable=True
+    )
     parent: Mapped["Folder"] = relationship(back_populates="files")
     versions: Mapped[List["FileVersion"]] = relationship(
         back_populates="file",
         cascade="all, delete-orphan",
-        order_by="FileVersion.version"
+        order_by="FileVersion.version",
     )
 
     @hybrid_property

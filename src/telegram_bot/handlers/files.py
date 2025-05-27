@@ -9,9 +9,23 @@ from core.db import get_session
 
 files_bot_rt = Router()
 
-@files_bot_rt.message((F.content_type.in_({
-    'document', 'photo', 'video', 'audio', 'voice', 'video_note', 'sticker', 'animation'
-})))
+
+@files_bot_rt.message(
+    (
+        F.content_type.in_(
+            {
+                "document",
+                "photo",
+                "video",
+                "audio",
+                "voice",
+                "video_note",
+                "sticker",
+                "animation",
+            }
+        )
+    )
+)
 async def cmd_start(message: Message):
     session_gen = get_session()
     session = await session_gen.__anext__()

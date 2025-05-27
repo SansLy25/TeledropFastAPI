@@ -16,18 +16,15 @@ class User(Base):
     photo_url: Mapped[Optional[str]]
 
     all_owned_folders: Mapped[List["Folder"]] = relationship(
-        back_populates="owner",
-        cascade="all, delete-orphan"
+        back_populates="owner", cascade="all, delete-orphan"
     )
 
     shared_editable_folders: Mapped[List["Folder"]] = relationship(
-        secondary="folder_editing_access",
-        back_populates="users_with_editing_access"
+        secondary="folder_editing_access", back_populates="users_with_editing_access"
     )
 
     shared_viewable_folders: Mapped[List["Folder"]] = relationship(
-        secondary="folder_view_access",
-        back_populates="users_with_view_access"
+        secondary="folder_view_access", back_populates="users_with_view_access"
     )
 
     def __repr__(self) -> str:

@@ -28,9 +28,11 @@ class TMAAuth(APIKeyHeader):
         return auth_header.split()[1]
 
 
-telegram_authentication_schema = TMAAuth(scheme_name="tma",
-                                         description="Authorization based on Telegram Init Data",
-                                         name="Authorization")
+telegram_authentication_schema = TMAAuth(
+    scheme_name="tma",
+    description="Authorization based on Telegram Init Data",
+    name="Authorization",
+)
 
 
 def get_telegram_authenticator() -> TelegramAuthenticator:
@@ -39,10 +41,8 @@ def get_telegram_authenticator() -> TelegramAuthenticator:
 
 
 def get_telegram_user_init_data(
-        auth_cred: str = Depends(
-            telegram_authentication_schema),
-        telegram_authenticator: TelegramAuthenticator = Depends(
-            get_telegram_authenticator),
+    auth_cred: str = Depends(telegram_authentication_schema),
+    telegram_authenticator: TelegramAuthenticator = Depends(get_telegram_authenticator),
 ) -> WebAppUser:
     try:
         init_data = telegram_authenticator.validate(auth_cred)
@@ -62,14 +62,14 @@ def get_telegram_user_init_data(
 
 
 async def get_or_create_user(
-        session: SessionDp,
-        user_init_data: WebAppUser = Depends(get_telegram_user_init_data),
+    session: SessionDp,
+    user_init_data: WebAppUser = Depends(get_telegram_user_init_data),
 ) -> User:
-    user = await UserService.get_by_tg_id(session=session,
-                                          tg_id=user_init_data.id)
+    user = await UserService.get_by_tg_id(session=session, tg_id=user_init_data.id)
     if user is None:
         return await UserService.create(session=session, user_in=user_init_data)
 
     return user
+
 
 UserDp = Annotated[User, Depends(get_or_create_user)]

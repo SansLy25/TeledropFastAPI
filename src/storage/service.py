@@ -22,12 +22,10 @@ class FolderService:
         return result.first()
 
     @staticmethod
-    async def create(session: AsyncSession, folder_in: FolderCreate,
-                     parent=None):
+    async def create(session: AsyncSession, folder_in: FolderCreate, parent=None):
         if parent is None:
             parent = await FolderService.get(session, folder_in.parent_id)
-        folder = Folder(parent=parent,
-                        **folder_in.model_dump(exclude={"parent_id"}))
+        folder = Folder(parent=parent, **folder_in.model_dump(exclude={"parent_id"}))
         session.add(folder)
         await session.commit()
         await session.refresh(folder)
@@ -35,8 +33,11 @@ class FolderService:
 
     @staticmethod
     async def get(session: AsyncSession, folder_id):
-        return await session.get(Folder, folder_id, options=(
-        selectinload(Folder.folders), selectinload(Folder.files)))
+        return await session.get(
+            Folder,
+            folder_id,
+            options=(selectinload(Folder.folders), selectinload(Folder.files)),
+        )
 
     @staticmethod
     async def create_root(session: AsyncSession, user: User):
