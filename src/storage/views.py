@@ -14,7 +14,7 @@ async def get_root(session: SessionDp, user: UserDp) -> RootFolderReadSchema:
 
 
 @storage_rt.post("/folders", tags=["Папки"])
-async def create_root(
+async def create_folder(
     session: SessionDp, user: UserDp, folder_in: FolderCreate
 ) -> FolderReadSchema:
     parent = await FolderService.get(session, folder_in.parent_id)
@@ -33,3 +33,14 @@ async def create_root(
     result = await FolderService.create(session, folder_in, parent)
 
     return result
+
+
+@storage_rt.get("/folders/{folder_id}", tags=["Папки"])
+async def create_folder(
+    session: SessionDp, user: UserDp, folder_id: int
+) -> FolderReadSchema:
+    folder = await FolderService.get_for_user(session, user, folder_id)
+    if not folder:
+        raise HTTPException(404, "Folder not found")
+
+    return folder

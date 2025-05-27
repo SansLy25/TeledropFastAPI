@@ -12,6 +12,18 @@ from users.models import User
 class FolderService:
 
     @staticmethod
+    async def get_for_user(session: AsyncSession, user, folder_id):
+        stmt = (
+            select(Folder)
+            .where(Folder.owner_id == user.id)
+            .where(Folder.id == folder_id)
+            .options(selectinload(Folder.folders), selectinload(Folder.files))
+        )
+
+        result = await session.scalars(stmt)
+        return result.first()
+
+    @staticmethod
     async def get_by_name_and_parent(session: AsyncSession, name, parent_id):
         stmt = (
             select(Folder)
