@@ -9,7 +9,7 @@ from .bot import bot, dispatcher
 bot_rt = APIRouter(prefix="/telegram/bot")
 
 
-@bot_rt.post("/webhook")
+@bot_rt.post("/webhook", tags=["Telegram"])
 async def bot_webhook(
     update: dict,
     secret_key_header: str = Header(None, alias="X-Telegram-Bot-Api-Secret-Token"),

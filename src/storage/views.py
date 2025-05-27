@@ -36,7 +36,7 @@ async def create_folder(
 
 
 @storage_rt.get("/folders/{folder_id}", tags=["Папки"])
-async def create_folder(
+async def get_folder(
     session: SessionDp, user: UserDp, folder_id: int
 ) -> FolderReadSchema:
     folder = await FolderService.get_for_user(session, user, folder_id)
