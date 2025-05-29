@@ -121,3 +121,9 @@ class FolderService:
         )
         result = await session.scalars(stmt)
         return result.first()
+
+
+    @staticmethod
+    async def delete(session: AsyncSession, folder: Folder):
+        await session.delete(folder)
+        await session.commit()

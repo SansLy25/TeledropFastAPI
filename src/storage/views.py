@@ -48,3 +48,10 @@ async def update_folder(
     updated_folder = await FolderService.update(session, folder_update, folder)
     await FolderService.update_child_paths(session, updated_folder)
     return updated_folder
+
+
+@storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
+async def delete_folder(
+        session: SessionDp, folder: FolderChangePermission
+):
+    await FolderService.delete(session, folder)
