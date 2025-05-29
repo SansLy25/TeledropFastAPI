@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import select, func, update, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -10,6 +10,49 @@ from users.models import User
 
 
 class FolderService:
+
+
+    @staticmethod
+    async def update_child_paths(session: AsyncSession, folder):
+        query = """
+        WITH RECURSIVE folder_tree AS (
+            -- Базовый случай: выбираем переименованную папку
+            SELECT 
+                id, 
+                name, 
+                path, 
+                parent_id
+            FROM 
+                folder
+            WHERE 
+                id = :folder_id
+
+            UNION ALL
+
+            -- Рекурсивный случай: все дочерние папки
+            SELECT 
+                f.id, 
+                f.name, 
+                (ft.path || f.name || '/') AS path, 
+                f.parent_id
+            FROM 
+                folder f
+            JOIN 
+                folder_tree ft ON f.parent_id = ft.id
+        )
+        -- Обновляем пути дочерних папок
+        UPDATE folder
+        SET path = ft.path
+        FROM folder_tree ft
+        WHERE folder.id = ft.id
+          AND folder.id != :folder_id;
+        """
+
+        await session.execute(
+            text(query),
+            {"folder_id": folder.id}
+        )
+        await session.commit()
 
     @staticmethod
     async def update(session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder):
