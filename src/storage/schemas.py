@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -41,6 +43,10 @@ class RootFolderReadSchema(BaseModel):
 class FolderCreate(BaseModel):
     name: str
     parent_id: int
+
+
+class FolderUpdate(BaseModel):
+    name: Optional[str] = None
 
 
 class FileReadSchema(FileBaseSchema):

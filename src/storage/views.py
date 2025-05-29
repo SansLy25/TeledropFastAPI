@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
 from core.db import SessionDp
-from storage.schemas import RootFolderReadSchema, FolderCreate, FolderReadSchema
+from storage.schemas import RootFolderReadSchema, FolderCreate, \
+    FolderReadSchema, FolderUpdate
 from users.auth import UserDp
 from storage.service import FolderService
 
@@ -44,3 +45,16 @@ async def get_folder(
         raise HTTPException(404, "Folder not found")
 
     return folder
+
+
+@storage_rt.patch("/folders/{folder_id}", tags=["Папки"])
+async def update_folder(
+    session: SessionDp, user: UserDp, folder_id: int, folder_update: FolderUpdate
+) -> FolderReadSchema:
+    folder = await FolderService.get_for_user(session, user, folder_id)
+    if not folder:
+        raise HTTPException(404, "Folder not found")
+
+
+
+    return await FolderService.update(session, folder_update, folder)

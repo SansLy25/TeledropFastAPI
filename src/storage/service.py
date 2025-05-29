@@ -5,14 +5,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from storage.models import Folder
-from storage.schemas import FolderCreate
+from storage.schemas import FolderCreate, FolderUpdate
 from users.models import User
 
 
 class FolderService:
 
     @staticmethod
-    async def get_for_user(session: AsyncSession, user, folder_id):
+    async def update(session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder):
+
+        for key, value in folder_update_in.model_dump().items():
+            setattr(folder, key, value)
+
+        await session.commit()
+        return folder
+
+
+    @staticmethod
+    async def get_for_user(session: AsyncSession, user: User, folder_id: int):
         stmt = (
             select(Folder)
             .where(Folder.owner_id == user.id)
