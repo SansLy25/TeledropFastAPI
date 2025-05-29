@@ -127,3 +127,10 @@ class FolderService:
     async def delete(session: AsyncSession, folder: Folder):
         await session.delete(folder)
         await session.commit()
+
+
+    @staticmethod
+    async def move_folder(session: AsyncSession, folder: Folder, new_parent: Folder):
+        folder.parent = new_parent
+        await session.commit()
+        return folder

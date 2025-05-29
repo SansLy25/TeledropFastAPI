@@ -48,6 +48,10 @@ class FolderUpdate(BaseModel):
     name: Optional[str] = None
 
 
+class FolderMove(BaseModel):
+    new_parent_id: int
+
+
 class FileReadSchema(FileBaseSchema):
     parent_id: int
     type: str

@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import HTTPException
 from fastapi.params import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import SessionDp
 from storage.models import Folder
@@ -31,5 +30,15 @@ async def change_folder_permission(folder_id: int, user: UserDp, session: Sessio
     return folder
 
 
+async def write_folder_permission(folder_id: int, user: UserDp, session: SessionDp):
+    # TODO: Добавить улучщенную логику прав
+    folder = await FolderService.get_for_user_owner(session, user, folder_id)
+    if not folder:
+        raise HTTPException(404, "Folder not found or access denied")
+
+    return folder
+
+
 FolderChangePermission = Annotated[Folder, Depends(change_folder_permission)]
 FolderReadPermission = Annotated[Folder, Depends(read_folder_permission)]
+FolderWritePermission = Annotated[Folder, Depends(write_folder_permission)]
