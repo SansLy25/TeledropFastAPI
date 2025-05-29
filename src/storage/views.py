@@ -55,9 +55,11 @@ async def move_folder(
         folder_move: FolderMove,
         user: UserDp,
 ) -> FolderReadSchema:
-    new_parent = await write_folder_permission(folder_move.new_parent_id, user, session)
-    await FolderService.update_child_paths(session, moved_folder)
-    return await FolderService.move_folder(session, moved_folder, new_parent)
+    new_parent = await write_folder_permission(folder_move.new_parent_id, user,
+                                               session)
+    folder = await FolderService.move_folder(session, moved_folder, new_parent)
+    await FolderService.update_child_paths(session, folder)
+    return folder
 
 
 @storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
@@ -65,3 +67,18 @@ async def delete_folder(
         session: SessionDp, folder: FolderWritePermission
 ):
     await FolderService.delete(session, folder)
+
+
+# @storage_rt.post("/folders/{folder_id}/copy", tags=["Папки"])
+# async def move_folder(
+#         session: SessionDp,
+#         moved_folder: FolderWritePermission,
+#         folder_copy: FolderMove,
+#         user: UserDp,
+# ):
+#     new_parent = await write_folder_permission(folder_copy.new_parent_id, user, session)
+#     folder = await FolderService.copy_folder(session, moved_folder, new_parent)
+#     await FolderService.update_child_paths(session, folder.parent)
+#     return folder
+
+# --- Эндпоинты файлов ---

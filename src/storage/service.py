@@ -1,17 +1,16 @@
 import logging
 
-from sqlalchemy import select, func, update, text
+from sqlalchemy import select, func, update, text, bindparam
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from watchfiles import awatch
 
-from storage.models import Folder
+from storage.models import Folder, File
 from storage.schemas import FolderCreate, FolderUpdate
 from users.models import User
 
 
 class FolderService:
-
-
     @staticmethod
     async def update_child_paths(session: AsyncSession, folder):
         query = """
@@ -134,3 +133,185 @@ class FolderService:
         folder.parent = new_parent
         await session.commit()
         return folder
+
+    # @staticmethod
+    # async def copy_folder(session: AsyncSession, copy_folder, target_folder):
+    #     source_folder_id = copy_folder.id
+    #     new_parent_id = target_folder.id
+    #     try:
+    #         # 1. Копируем основную папку
+    #         copy_folder_query = text("""
+    #             INSERT INTO folder (name, parent_id, owner_id, is_root, path)
+    #             SELECT
+    #                 name || ' (copy)',
+    #                 :new_parent_id,
+    #                 owner_id,
+    #                 is_root,
+    #                 NULL
+    #             FROM folder
+    #             WHERE id = :source_folder_id
+    #             RETURNING id
+    #         """)
+    #
+    #         result = await session.execute(
+    #             copy_folder_query,
+    #             {"source_folder_id": source_folder_id,
+    #              "new_parent_id": new_parent_id}
+    #         )
+    #         new_folder_id = result.scalar()
+    #         await session.commit()
+    #
+    #         # 2. Получаем все вложенные папки рекурсивно
+    #         get_subfolders_query = text("""
+    #             WITH RECURSIVE folder_tree AS (
+    #                 SELECT id, name, parent_id, owner_id, is_root
+    #                 FROM folder
+    #                 WHERE id = :source_folder_id
+    #
+    #                 UNION ALL
+    #
+    #                 SELECT f.id, f.name, f.parent_id, f.owner_id, f.is_root
+    #                 FROM folder f
+    #                 JOIN folder_tree ft ON f.parent_id = ft.id
+    #             )
+    #             SELECT * FROM folder_tree WHERE id != :source_folder_id
+    #         """)
+    #
+    #         result = await session.execute(
+    #             get_subfolders_query,
+    #             {"source_folder_id": source_folder_id}
+    #         )
+    #         subfolders = result.fetchall()
+    #
+    #         folder_mappings = {source_folder_id: new_folder_id}
+    #
+    #         for folder in subfolders:
+    #             old_id, name, parent_id, owner_id, is_root = folder
+    #             new_parent_id = folder_mappings[parent_id]
+    #
+    #             insert_query = text("""
+    #                 INSERT INTO folder (name, parent_id, owner_id, is_root, path)
+    #                 VALUES (:name, :parent_id, :owner_id, :is_root, NULL)
+    #                 RETURNING id
+    #             """)
+    #
+    #             result = await session.execute(
+    #                 insert_query,
+    #                 {
+    #                     "name": name,
+    #                     "parent_id": new_parent_id,
+    #                     "owner_id": owner_id,
+    #                     "is_root": is_root
+    #                 }
+    #             )
+    #             new_id = result.scalar()
+    #             folder_mappings[old_id] = new_id
+    #
+    #         await session.commit()
+    #
+    #         if folder_mappings:
+    #             file_mappings = {}
+    #
+    #             get_files_query = text("""
+    #                 SELECT id, name, type, parent_id
+    #                 FROM file
+    #                 WHERE parent_id = ANY(:parent_ids)
+    #             """)
+    #
+    #             result = await session.execute(
+    #                 get_files_query,
+    #                 {"parent_ids": list(folder_mappings.keys())}
+    #             )
+    #             files = result.fetchall()
+    #
+    #             for file_id, name, file_type, old_parent_id in files:
+    #                 new_parent_id = folder_mappings[old_parent_id]
+    #
+    #                 insert_file_query = text("""
+    #                     INSERT INTO file (name, type, parent_id, _path_cache)
+    #                     VALUES (:name, :type, :parent_id, NULL)
+    #                     RETURNING id
+    #                 """)
+    #
+    #                 result = await session.execute(
+    #                     insert_file_query,
+    #                     {
+    #                         "name": name,
+    #                         "type": file_type,
+    #                         "parent_id": new_parent_id
+    #                     }
+    #                 )
+    #                 new_file_id = result.scalar()
+    #                 file_mappings[file_id] = new_file_id
+    #
+    #             if file_mappings:
+    #                 get_versions_query = text("""
+    #                     SELECT created_at, version, telegram_file_id, file_id, size
+    #                     FROM file_version
+    #                     WHERE file_id = ANY(:file_ids)
+    #                 """)
+    #
+    #                 result = await session.execute(
+    #                     get_versions_query,
+    #                     {"file_ids": list(file_mappings.keys())}
+    #                 )
+    #                 versions = result.fetchall()
+    #
+    #                 for created_at, version, telegram_file_id, old_file_id, size in versions:
+    #                     new_file_id = file_mappings[old_file_id]
+    #
+    #                     insert_version_query = text("""
+    #                         INSERT INTO file_version (created_at, version, telegram_file_id, file_id, size)
+    #                         VALUES (:created_at, :version, :telegram_file_id, :file_id, :size)
+    #                     """)
+    #
+    #                     await session.execute(
+    #                         insert_version_query,
+    #                         {
+    #                             "created_at": created_at,
+    #                             "version": version,
+    #                             "telegram_file_id": telegram_file_id,
+    #                             "file_id": new_file_id,
+    #                             "size": size
+    #                         }
+    #                     )
+    #
+    #         for old_folder_id, new_folder_id in folder_mappings.items():
+    #             copy_edit_access_query = text("""
+    #                 INSERT INTO folder_editing_access (folder_id, user_id)
+    #                 SELECT :new_folder_id, user_id
+    #                 FROM folder_editing_access
+    #                 WHERE folder_id = :old_folder_id
+    #             """)
+    #
+    #             await session.execute(
+    #                 copy_edit_access_query,
+    #                 {"old_folder_id": old_folder_id,
+    #                  "new_folder_id": new_folder_id}
+    #             )
+    #
+    #             copy_view_access_query = text("""
+    #                 INSERT INTO folder_view_access (folder_id, user_id)
+    #                 SELECT :new_folder_id, user_id
+    #                 FROM folder_view_access
+    #                 WHERE folder_id = :old_folder_id
+    #             """)
+    #
+    #             await session.execute(
+    #                 copy_view_access_query,
+    #                 {"old_folder_id": old_folder_id,
+    #                  "new_folder_id": new_folder_id}
+    #             )
+    #
+    #         await session.commit()
+    #         return await FolderService.get(session, new_folder_id)
+    #
+    #     except Exception as e:
+    #         await session.rollback()
+    #         raise e
+
+
+class FileService:
+    @staticmethod
+    async def get(session: AsyncSession, file_id):
+        return await session.get(File, file_id)
