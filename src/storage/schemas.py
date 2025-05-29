@@ -26,12 +26,11 @@ class FolderNestedSchema(FolderBaseSchema):
 
 
 class FolderReadSchema(FolderBaseSchema):
-    pass
     files: list[FileNestedSchema] = []
     folders: list[FolderNestedSchema] = []
     is_root: bool
     path: str
-    parent_id: int
+    parent_id: Optional[int] = None
 
 
 class RootFolderReadSchema(BaseModel):

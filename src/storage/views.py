@@ -7,7 +7,8 @@ from storage.schemas import RootFolderReadSchema, FolderCreate, \
     FolderReadSchema, FolderUpdate
 from users.auth import UserDp
 from storage.service import FolderService
-from users.service import UserService
+from storage.dependencies import FolderReadPermission, FolderChangePermission, \
+    change_folder_permission
 
 storage_rt = APIRouter(prefix="/storage")
 
@@ -19,17 +20,12 @@ async def get_root(session: SessionDp, user: UserDp) -> RootFolderReadSchema:
 
 @storage_rt.post("/folders", tags=["Папки"])
 async def create_folder(
-    session: SessionDp, user: UserDp, folder_in: FolderCreate
+        session: SessionDp, user: UserDp, folder_in: FolderCreate,
 ) -> FolderReadSchema:
-    parent = await FolderService.get(session, folder_in.parent_id)
-    if parent is None:
-        raise HTTPException(404, "Parent not found")
-
-    if parent.owner_id != user.id:
-        raise HTTPException(403, "Parent folder doesn't belong to you")
+    parent = await change_folder_permission(folder_in.parent_id, user, session)
 
     if await FolderService.get_by_name_and_parent(
-        session, folder_in.name, folder_in.parent_id
+            session, folder_in.name, folder_in.parent_id
     ):
         raise HTTPException(
             409, "Folder with this name already exists in parent folder"
@@ -40,23 +36,15 @@ async def create_folder(
 
 
 @storage_rt.get("/folders/{folder_id}", tags=["Папки"])
-async def get_folder(
-    session: SessionDp, user: UserDp, folder_id: int
-) -> FolderReadSchema:
-    folder = await FolderService.get_for_user(session, user, folder_id)
-    if not folder:
-        raise HTTPException(404, "Folder not found")
-
+async def get_folder(folder: FolderReadPermission) -> FolderReadSchema:
     return folder
 
 
 @storage_rt.patch("/folders/{folder_id}", tags=["Папки"])
 async def update_folder(
-    session: SessionDp, user: UserDp, folder_id: int, folder_update: FolderUpdate
+        session: SessionDp, folder: FolderChangePermission,
+        folder_update: FolderUpdate
 ) -> FolderReadSchema:
-    folder = await FolderService.get_for_user(session, user, folder_id)
-    if not folder:
-        raise HTTPException(404, "Folder not found")
     updated_folder = await FolderService.update(session, folder_update, folder)
     await FolderService.update_child_paths(session, updated_folder)
     return updated_folder

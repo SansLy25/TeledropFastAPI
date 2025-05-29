@@ -16,7 +16,6 @@ class FolderService:
     async def update_child_paths(session: AsyncSession, folder):
         query = """
         WITH RECURSIVE folder_tree AS (
-            -- Базовый случай: выбираем переименованную папку
             SELECT 
                 id, 
                 name, 
@@ -29,7 +28,6 @@ class FolderService:
 
             UNION ALL
 
-            -- Рекурсивный случай: все дочерние папки
             SELECT 
                 f.id, 
                 f.name, 
@@ -40,7 +38,6 @@ class FolderService:
             JOIN 
                 folder_tree ft ON f.parent_id = ft.id
         )
-        -- Обновляем пути дочерних папок
         UPDATE folder
         SET path = ft.path
         FROM folder_tree ft
@@ -63,9 +60,8 @@ class FolderService:
         await session.commit()
         return folder
 
-
     @staticmethod
-    async def get_for_user(session: AsyncSession, user: User, folder_id: int):
+    async def get_for_user_owner(session: AsyncSession, user: User, folder_id: int):
         stmt = (
             select(Folder)
             .where(Folder.owner_id == user.id)
