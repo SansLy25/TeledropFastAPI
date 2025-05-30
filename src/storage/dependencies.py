@@ -13,7 +13,7 @@ T = TypeVar('T', Folder, File)
 
 
 async def get_folder_or_404(session: SessionDp, user: UserDp,
-                          folder_id: int) -> Folder:
+                            folder_id: int) -> Folder:
     folder = await FolderService.get_for_user_owner(session, user, folder_id)
     if not folder:
         raise HTTPException(status_code=404,
@@ -24,7 +24,8 @@ async def get_folder_or_404(session: SessionDp, user: UserDp,
 async def get_file_or_404(session: SessionDp, file_id: int) -> File:
     file = await FileService.get(session, file_id)
     if not file:
-        raise HTTPException(status_code=404, detail="File not found or access denied")
+        raise HTTPException(status_code=404,
+                            detail="File not found or access denied")
     return file
 
 
@@ -46,14 +47,18 @@ async def check_permission(
     return obj
 
 
-async def folder_permission(
+def get_folder_permission(
+        permission: Permission = Permission.READ
+):
+    async def wrapper(
         folder_id: int = Path(...),
         user: User = Depends(get_or_create_user),
         session: AsyncSession = Depends(get_session),
-        permission: Permission = Permission.READ
-) -> Folder:
-    folder = await get_folder_or_404(session, user, folder_id)
-    return await check_permission(folder, user, permission, session)
+    ) -> Folder:
+        folder = await get_folder_or_404(session, user, folder_id)
+        return await check_permission(folder, user, permission, session)
+
+    return wrapper
 
 
 async def file_permission(
@@ -66,9 +71,12 @@ async def file_permission(
     return await check_permission(file, user, permission, session)
 
 
-FolderReadPermission = Annotated[Folder, Depends(folder_permission)]
-FolderWritePermission = Annotated[Folder, Depends(lambda: folder_permission(permission=Permission.WRITE))]
-FolderChangePermission = Annotated[Folder, Depends(lambda: folder_permission(permission=Permission.CHANGE))]
+FolderReadPermission = Annotated[Folder, Depends(get_folder_permission())]
+FolderWritePermission = Annotated[
+    Folder, Depends(get_folder_permission(permission=Permission.WRITE))]
+FolderChangePermission = Annotated[
+    Folder, Depends(get_folder_permission(permission=Permission.CHANGE))]
 
 FileReadPermission = Annotated[File, Depends(file_permission)]
-FileWritePermission = Annotated[File, Depends(lambda: file_permission(permission=Permission.WRITE))]
+FileWritePermission = Annotated[
+    File, Depends(lambda: file_permission(permission=Permission.WRITE))]

@@ -1,9 +1,6 @@
-import logging
-
-from sqlalchemy import select, func, update, text, bindparam
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from watchfiles import awatch
 
 from storage.models import Folder, File
 from storage.schemas import FolderCreate, FolderUpdate

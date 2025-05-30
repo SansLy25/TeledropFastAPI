@@ -2,13 +2,12 @@ from fastapi import APIRouter, HTTPException
 
 from core.db import SessionDp
 from storage.enums import Permission
-from storage.models import Folder
 from storage.schemas import RootFolderReadSchema, FolderCreate, \
     FolderReadSchema, FolderUpdate, FolderMove
 from users.auth import UserDp
 from storage.service import FolderService
 from storage.dependencies import FolderReadPermission, FolderChangePermission, \
-    FolderWritePermission, folder_permission
+    FolderWritePermission, get_folder_permission
 
 storage_rt = APIRouter(prefix="/storage")
 
@@ -22,7 +21,11 @@ async def get_root(session: SessionDp, user: UserDp) -> RootFolderReadSchema:
 async def create_folder(
         session: SessionDp, user: UserDp, folder_in: FolderCreate,
 ) -> FolderReadSchema:
-    parent = await folder_permission(folder_in.parent_id, user, session, Permission.CHANGE)
+    parent = await get_folder_permission(Permission.CHANGE)(
+        folder_in.parent_id,
+        user,
+        session
+    )
 
     if await FolderService.get_by_name_and_parent(
             session, folder_in.name, folder_in.parent_id
@@ -57,13 +60,13 @@ async def move_folder(
         folder_move: FolderMove,
         user: UserDp,
 ) -> FolderReadSchema:
-    new_parent = await folder_permission(folder_move.new_parent_id, user,
-                                         session, Permission.WRITE)
+    new_parent = await get_folder_permission(Permission.WRITE)(
+        folder_move.new_parent_id, user, session)
 
     if await FolderService.get_by_name_and_parent(
-        session,
-        moved_folder.name,
-        folder_move.new_parent_id
+            session,
+            moved_folder.name,
+            folder_move.new_parent_id
     ):
         raise HTTPException(409, "Names conflict, rename folder")
     folder = await FolderService.move_folder(session, moved_folder, new_parent)
@@ -73,7 +76,7 @@ async def move_folder(
 
 @storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
 async def delete_folder(
-        session: SessionDp, folder: FolderWritePermission
+        session: SessionDp, folder: FolderChangePermission
 ):
     await FolderService.delete(session, folder)
 
