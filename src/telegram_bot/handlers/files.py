@@ -1,11 +1,9 @@
-from aiogram import Router
-from aiogram import F
+from aiogram import F, Router
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from users.service import UserService
 from core.db import get_session
-
+from users.service import UserService
 
 files_bot_rt = Router()
 

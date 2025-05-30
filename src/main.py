@@ -1,7 +1,7 @@
 import logging
 import time
 
-from fastapi import FastAPI, Request, APIRouter
+from fastapi import APIRouter, FastAPI, Request
 
 from core.db import init_db
 from settings import settings
@@ -9,7 +9,6 @@ from storage.views import storage_rt
 from telegram_bot.bot import bot
 from telegram_bot.views import bot_rt
 from users.views import user_rt
-
 
 logging.basicConfig(level=logging.INFO)
 

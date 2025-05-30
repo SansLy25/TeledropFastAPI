@@ -1,13 +1,22 @@
 from fastapi import APIRouter, HTTPException
 
 from core.db import SessionDp
+from storage.dependencies import (
+    FolderChangePermission,
+    FolderReadPermission,
+    FolderWritePermission,
+    get_folder_permission,
+)
 from storage.enums import Permission
-from storage.schemas import RootFolderReadSchema, FolderCreate, \
-    FolderReadSchema, FolderUpdate, FolderMove
-from users.auth import UserDp
+from storage.schemas import (
+    FolderCreate,
+    FolderMove,
+    FolderReadSchema,
+    FolderUpdate,
+    RootFolderReadSchema,
+)
 from storage.service import FolderService
-from storage.dependencies import FolderReadPermission, FolderChangePermission, \
-    FolderWritePermission, get_folder_permission
+from users.auth import UserDp
 
 storage_rt = APIRouter(prefix="/storage")
 
@@ -19,16 +28,16 @@ async def get_root(session: SessionDp, user: UserDp) -> RootFolderReadSchema:
 
 @storage_rt.post("/folders", tags=["Папки"])
 async def create_folder(
-        session: SessionDp, user: UserDp, folder_in: FolderCreate,
+    session: SessionDp,
+    user: UserDp,
+    folder_in: FolderCreate,
 ) -> FolderReadSchema:
     parent = await get_folder_permission(Permission.CHANGE)(
-        folder_in.parent_id,
-        user,
-        session
+        folder_in.parent_id, user, session
     )
 
     if await FolderService.get_by_name_and_parent(
-            session, folder_in.name, folder_in.parent_id
+        session, folder_in.name, folder_in.parent_id
     ):
         raise HTTPException(
             409, "Folder with this name already exists in parent folder"
@@ -45,8 +54,7 @@ async def get_folder(folder: FolderReadPermission) -> FolderReadSchema:
 
 @storage_rt.patch("/folders/{folder_id}", tags=["Папки"])
 async def update_folder(
-        session: SessionDp, folder: FolderChangePermission,
-        folder_update: FolderUpdate
+    session: SessionDp, folder: FolderChangePermission, folder_update: FolderUpdate
 ) -> FolderReadSchema:
     updated_folder = await FolderService.update(session, folder_update, folder)
     await FolderService.update_child_paths(session, updated_folder)
@@ -55,18 +63,17 @@ async def update_folder(
 
 @storage_rt.post("/folders/{folder_id}/move", tags=["Папки"])
 async def move_folder(
-        session: SessionDp,
-        moved_folder: FolderWritePermission,
-        folder_move: FolderMove,
-        user: UserDp,
+    session: SessionDp,
+    moved_folder: FolderWritePermission,
+    folder_move: FolderMove,
+    user: UserDp,
 ) -> FolderReadSchema:
     new_parent = await get_folder_permission(Permission.WRITE)(
-        folder_move.new_parent_id, user, session)
+        folder_move.new_parent_id, user, session
+    )
 
     if await FolderService.get_by_name_and_parent(
-            session,
-            moved_folder.name,
-            folder_move.new_parent_id
+        session, moved_folder.name, folder_move.new_parent_id
     ):
         raise HTTPException(409, "Names conflict, rename folder")
     folder = await FolderService.move_folder(session, moved_folder, new_parent)
@@ -75,10 +82,9 @@ async def move_folder(
 
 
 @storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
-async def delete_folder(
-        session: SessionDp, folder: FolderChangePermission
-):
+async def delete_folder(session: SessionDp, folder: FolderChangePermission):
     await FolderService.delete(session, folder)
+
 
 # @storage_rt.post("/folders/{folder_id}/copy", tags=["Папки"])
 # async def move_folder(

@@ -1,19 +1,19 @@
 import http
 from typing import Annotated
 
-from fastapi import Depends, Request
-from fastapi import HTTPException
-from fastapi.security import HTTPBasic, APIKeyHeader
-
-from telegram_webapp_auth.auth import TelegramAuthenticator
-from telegram_webapp_auth.auth import WebAppUser
-from telegram_webapp_auth.auth import generate_secret_key
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import APIKeyHeader, HTTPBasic
+from telegram_webapp_auth.auth import (
+    TelegramAuthenticator,
+    WebAppUser,
+    generate_secret_key,
+)
 from telegram_webapp_auth.errors import InvalidInitDataError
 
+from core.db import SessionDp
 from settings import settings
 from users.models import User
 from users.service import UserService
-from core.db import SessionDp
 
 
 class TMAAuth(APIKeyHeader):

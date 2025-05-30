@@ -2,7 +2,7 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from storage.models import Folder, File
+from storage.models import File, Folder
 from storage.schemas import FolderCreate, FolderUpdate
 from users.models import User
 
@@ -12,26 +12,26 @@ class FolderService:
     async def update_child_paths(session: AsyncSession, folder):
         query = """
         WITH RECURSIVE folder_tree AS (
-            SELECT 
-                id, 
-                name, 
-                path, 
+            SELECT
+                id,
+                name,
+                path,
                 parent_id
-            FROM 
+            FROM
                 folder
-            WHERE 
+            WHERE
                 id = :folder_id
 
             UNION ALL
 
-            SELECT 
-                f.id, 
-                f.name, 
-                (ft.path || f.name || '/') AS path, 
+            SELECT
+                f.id,
+                f.name,
+                (ft.path || f.name || '/') AS path,
                 f.parent_id
-            FROM 
+            FROM
                 folder f
-            JOIN 
+            JOIN
                 folder_tree ft ON f.parent_id = ft.id
         )
         UPDATE folder
@@ -41,15 +41,13 @@ class FolderService:
           AND folder.id != :folder_id;
         """
 
-        await session.execute(
-            text(query),
-            {"folder_id": folder.id}
-        )
+        await session.execute(text(query), {"folder_id": folder.id})
         await session.commit()
 
     @staticmethod
-    async def update(session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder):
-
+    async def update(
+        session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder
+    ):
         for key, value in folder_update_in.model_dump().items():
             setattr(folder, key, value)
 
@@ -118,12 +116,10 @@ class FolderService:
         result = await session.scalars(stmt)
         return result.first()
 
-
     @staticmethod
     async def delete(session: AsyncSession, folder: Folder):
         await session.delete(folder)
         await session.commit()
-
 
     @staticmethod
     async def move_folder(session: AsyncSession, folder: Folder, new_parent: Folder):

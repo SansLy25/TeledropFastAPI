@@ -3,8 +3,8 @@ from fastapi.params import Header
 from pydantic import ValidationError
 
 from settings import settings
-from .bot import bot, dispatcher
 
+from .bot import bot, dispatcher
 
 bot_rt = APIRouter(prefix="/telegram/bot")
 

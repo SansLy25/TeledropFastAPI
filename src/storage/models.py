@@ -1,18 +1,12 @@
-import mimetypes
 from datetime import datetime
-
-from sqlalchemy import ForeignKey, String, Text, Integer, event, Table, Column
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship,
-    validates,
-)
-from sqlalchemy.ext.hybrid import hybrid_property
+import mimetypes
 from typing import List, Optional
 
-from core.db import Base
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text, event
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from core.db import Base
 
 folder_editing_access = Table(
     "folder_editing_access",
