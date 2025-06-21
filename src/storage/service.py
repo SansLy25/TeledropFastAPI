@@ -50,8 +50,7 @@ class FolderService:
 
     @staticmethod
     async def update(
-            session: AsyncSession, folder_update_in: FolderUpdate,
-            folder: Folder
+        session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder
     ):
         for key, value in folder_update_in.model_dump().items():
             setattr(folder, key, value)
@@ -60,8 +59,7 @@ class FolderService:
         return folder
 
     @staticmethod
-    async def get_for_user_owner(session: AsyncSession, user: User,
-                                 folder_id: int):
+    async def get_for_user_owner(session: AsyncSession, user: User, folder_id: int):
         stmt = (
             select(Folder)
             .where(Folder.owner_id == user.id)
@@ -83,12 +81,10 @@ class FolderService:
         return result.first()
 
     @staticmethod
-    async def create(session: AsyncSession, folder_in: FolderCreate,
-                     parent=None):
+    async def create(session: AsyncSession, folder_in: FolderCreate, parent=None):
         if parent is None:
             parent = await FolderService.get(session, folder_in.parent_id)
-        folder = Folder(parent=parent,
-                        **folder_in.model_dump(exclude={"parent_id"}))
+        folder = Folder(parent=parent, **folder_in.model_dump(exclude={"parent_id"}))
         session.add(folder)
         await session.commit()
         await session.refresh(folder)
@@ -140,8 +136,7 @@ class FolderService:
         await session.commit()
 
     @staticmethod
-    async def move_folder(session: AsyncSession, folder: Folder,
-                          new_parent: Folder):
+    async def move_folder(session: AsyncSession, folder: Folder, new_parent: Folder):
         folder.parent = new_parent
         await session.commit()
         return folder
@@ -330,7 +325,7 @@ class FileService:
 
     @staticmethod
     async def get_count_by_parent_and_name_contains(
-            session: AsyncSession, parent_id: int, name: str
+        session: AsyncSession, parent_id: int, name: str
     ) -> int:
         stmt = (
             select(func.count())
@@ -344,7 +339,7 @@ class FileService:
 
     @staticmethod
     async def get_by_parent_and_name(
-            session: AsyncSession, parent: Folder, name: str
+        session: AsyncSession, parent: Folder, name: str
     ) -> File:
         stmt = (
             select(File)
@@ -358,27 +353,25 @@ class FileService:
 
     @staticmethod
     async def create(
-            session: AsyncSession,
-            telegram_file_data: dict,
-            parent: Folder
+        session: AsyncSession, telegram_file_data: dict, parent: Folder
     ) -> File:
 
         if not telegram_file_data.get("name"):
             current_date = datetime.now()
-            file_type = telegram_file_data["type"].split("/")[
-                -1]
+            file_type = telegram_file_data["type"].split("/")[-1]
             name = f"{current_date.strftime('%Y-%m-%d_%H-%M-%S')}.{file_type}"
 
             count = await FileService.get_count_by_parent_and_name_contains(
-                session, parent.id,
-                name.split(".")[0])
+                session, parent.id, name.split(".")[0]
+            )
 
             if count > 0:
-                name = (f"{telegram_file_data["type"].split("/")[0]}_"
-                        f"{name.split('.')[0]}_({count + 1}).{file_type}")
+                name = (
+                    f"{telegram_file_data["type"].split("/")[0]}_"
+                    f"{name.split('.')[0]}_({count + 1}).{file_type}"
+                )
 
             telegram_file_data["name"] = name
-
 
         first_version = FileVersion(
             version=1,
@@ -386,18 +379,19 @@ class FileService:
             size=telegram_file_data["size"],
         )
 
-        file = File(parent=parent, name=telegram_file_data["name"], type=telegram_file_data["type"], versions=[first_version])
+        file = File(
+            parent=parent,
+            name=telegram_file_data["name"],
+            type=telegram_file_data["type"],
+            versions=[first_version],
+        )
         session.add(file)
         await session.commit()
         await session.refresh(file)
         return file
 
     @staticmethod
-    async def update(
-            session: AsyncSession,
-            file: File,
-            update_data: dict
-    ) -> File:
+    async def update(session: AsyncSession, file: File, update_data: dict) -> File:
         file.versions.append(
             FileVersion(
                 version=file.versions[-1].version + 1,
@@ -411,9 +405,7 @@ class FileService:
 
     @staticmethod
     async def update_or_create(
-            session: AsyncSession,
-            telegram_file_data: dict,
-            parent: Folder
+        session: AsyncSession, telegram_file_data: dict, parent: Folder
     ) -> Tuple[str, File]:
         file = None
         if telegram_file_data["name"]:
@@ -422,7 +414,8 @@ class FileService:
             )
 
         if file:
-            return "updated", await FileService.update(session, file, telegram_file_data)
+            return "updated", await FileService.update(
+                session, file, telegram_file_data
+            )
 
         return "created", await FileService.create(session, telegram_file_data, parent)
-

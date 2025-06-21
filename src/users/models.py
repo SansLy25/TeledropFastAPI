@@ -21,7 +21,7 @@ class User(Base):
     all_owned_folders: Mapped[List["Folder"]] = relationship(
         back_populates="owner",
         cascade="all, delete-orphan",
-        foreign_keys="[Folder.owner_id]"
+        foreign_keys="[Folder.owner_id]",
     )
 
     current_folder: Mapped["Folder"] = relationship(
@@ -29,7 +29,6 @@ class User(Base):
         back_populates="current_users",
         lazy="selectin",
     )
-
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username='{self.username}')>"

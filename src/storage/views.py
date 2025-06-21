@@ -34,7 +34,9 @@ async def get_current_folder(user: UserDp, session: SessionDp) -> FolderReadSche
 
 
 @storage_rt.post("/folders/{folder_id}/current", tags=["Папки"])
-async def set_current_folder(folder: FolderReadPermission, user: UserDp, session: SessionDp) -> FolderReadSchema:
+async def set_current_folder(
+    folder: FolderReadPermission, user: UserDp, session: SessionDp
+) -> FolderReadSchema:
     user.current_folder = folder
     session.add(user)
     await session.commit()
@@ -60,7 +62,6 @@ async def create_folder(
     result = await FolderService.create(session, folder_in, parent)
 
     return result
-
 
 
 @storage_rt.get("/folders/{folder_id}", tags=["Папки"])

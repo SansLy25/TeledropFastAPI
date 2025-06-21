@@ -15,8 +15,12 @@ class UserService:
 
     @staticmethod
     async def get_by_tg_id(*, session: AsyncSession, tg_id: int) -> User | None:
-        stmt = select(User).where(User.telegram_id == tg_id).options(
-            selectinload(User.current_folder), selectinload(User.all_owned_folders)
+        stmt = (
+            select(User)
+            .where(User.telegram_id == tg_id)
+            .options(
+                selectinload(User.current_folder), selectinload(User.all_owned_folders)
+            )
         )
         result = await session.execute(stmt)
         return result.scalars().first()

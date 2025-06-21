@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from core.db import Base
 
 
-
 class Folder(Base):
     __tablename__ = "folder"
 
@@ -43,7 +42,7 @@ class Folder(Base):
         back_populates="current_folder",
         foreign_keys="[User.current_folder_id]",
         lazy="selectin",
-        viewonly = True
+        viewonly=True,
     )
 
     def set_parent_owner(self) -> None:

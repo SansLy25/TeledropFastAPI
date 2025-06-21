@@ -1,12 +1,5 @@
 from aiogram import F, Router
-from aiogram.types import (
-    TelegramObject,
-    Voice,
-    VideoNote,
-    Sticker,
-    Message,
-    PhotoSize
-)
+from aiogram.types import TelegramObject, Voice, VideoNote, Sticker, Message, PhotoSize
 import logging
 
 from storage.service import FolderService, FileService
@@ -23,8 +16,9 @@ async def get_file_telegram_object(message: Message):
 
     return getattr(message, content_type)
 
+
 async def extract_data_from_telegram_object(
-        message_object: TelegramObject,
+    message_object: TelegramObject,
 ) -> dict:
 
     file_data = {
@@ -63,21 +57,14 @@ async def extract_data_from_telegram_object(
         )
     )
 )
-async def file_handler(message: Message):
+async def file_upload_handler(message: Message):
     session = await get_db_session_for_bot()
-    user = await UserService.get_by_tg_id(
-        session=session,
-        tg_id=message.from_user.id
-    )
+    user = await UserService.get_by_tg_id(session=session, tg_id=message.from_user.id)
     current_folder = await FolderService.get_current_folder(user, session)
 
     message_file = await get_file_telegram_object(message)
     file_data = await extract_data_from_telegram_object(message_file)
-    action, file = await FileService.update_or_create(session, file_data, current_folder)
+    action, file = await FileService.update_or_create(
+        session, file_data, current_folder
+    )
     await message.answer(file.name + " " + action)
-
-
-
-
-
-
