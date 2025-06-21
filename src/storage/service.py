@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from sqlalchemy import select, text, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -355,9 +356,11 @@ class FileService:
                 name.split(".")[0])
 
             if count > 0:
-                name = f"{name.split('.')[0]}_{count + 1}.{file_type}"
+                name = (f"{file_data["type"].split("/")[0]}_"
+                        f"{name.split('.')[0]}_({count + 1}).{file_type}")
 
             file_data["name"] = name
+
 
         first_version = FileVersion(
             version=1,
@@ -366,7 +369,6 @@ class FileService:
         )
 
         file = File(parent=parent, name=file_data["name"], type=file_data["type"], versions=[first_version])
-
         session.add(file)
         await session.commit()
         await session.refresh(file)

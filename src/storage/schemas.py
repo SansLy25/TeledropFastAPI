@@ -10,7 +10,7 @@ class BaseFileFolderSchema(BaseModel):
 
 class FileBaseSchema(BaseFileFolderSchema):
     path: str
-    size: int
+    type: str
 
 
 class FolderBaseSchema(BaseFileFolderSchema):

@@ -7,6 +7,7 @@ from aiogram.types import (
     Message,
     PhotoSize
 )
+import logging
 
 from storage.service import FolderService, FileService
 from telegram_bot.utils import get_db_session_for_bot
@@ -30,6 +31,7 @@ async def extract_data_from_telegram_object(
         "telegram_file_id": message_object.file_id,
         "size": getattr(message_object, "file_size", None),
         "type": getattr(message_object, "mime_type", None),
+        "name": getattr(message_object, "file_name", None),
     }
 
     TYPES_CONVERT = {
