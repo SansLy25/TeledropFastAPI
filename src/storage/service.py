@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+from typing import Tuple
 
 from sqlalchemy import select, text, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -342,12 +343,29 @@ class FileService:
         return result or 0
 
     @staticmethod
-    async def create(session: AsyncSession, file_data: dict,
-                     parent: Folder) -> File:
+    async def get_by_parent_and_name(
+            session: AsyncSession, parent: Folder, name: str
+    ) -> File:
+        stmt = (
+            select(File)
+            .where(File.parent_id == parent.id)
+            .where(File.name == name)
+            .options(selectinload(File.versions))
+        )
+        result = await session.scalars(stmt)
 
-        if not file_data.get("name"):
+        return result.first()
+
+    @staticmethod
+    async def create(
+            session: AsyncSession,
+            telegram_file_data: dict,
+            parent: Folder
+    ) -> File:
+
+        if not telegram_file_data.get("name"):
             current_date = datetime.now()
-            file_type = file_data["type"].split("/")[
+            file_type = telegram_file_data["type"].split("/")[
                 -1]
             name = f"{current_date.strftime('%Y-%m-%d_%H-%M-%S')}.{file_type}"
 
@@ -356,20 +374,55 @@ class FileService:
                 name.split(".")[0])
 
             if count > 0:
-                name = (f"{file_data["type"].split("/")[0]}_"
+                name = (f"{telegram_file_data["type"].split("/")[0]}_"
                         f"{name.split('.')[0]}_({count + 1}).{file_type}")
 
-            file_data["name"] = name
+            telegram_file_data["name"] = name
 
 
         first_version = FileVersion(
             version=1,
-            telegram_file_id=file_data["telegram_file_id"],
-            size=file_data["size"],
+            telegram_file_id=telegram_file_data["telegram_file_id"],
+            size=telegram_file_data["size"],
         )
 
-        file = File(parent=parent, name=file_data["name"], type=file_data["type"], versions=[first_version])
+        file = File(parent=parent, name=telegram_file_data["name"], type=telegram_file_data["type"], versions=[first_version])
         session.add(file)
         await session.commit()
         await session.refresh(file)
         return file
+
+    @staticmethod
+    async def update(
+            session: AsyncSession,
+            file: File,
+            update_data: dict
+    ) -> File:
+        file.versions.append(
+            FileVersion(
+                version=file.versions[-1].version + 1,
+                telegram_file_id=update_data["telegram_file_id"],
+                size=update_data["size"],
+            )
+        )
+        session.add(file)
+        await session.commit()
+        return file
+
+    @staticmethod
+    async def update_or_create(
+            session: AsyncSession,
+            telegram_file_data: dict,
+            parent: Folder
+    ) -> Tuple[str, File]:
+        file = None
+        if telegram_file_data["name"]:
+            file = await FileService.get_by_parent_and_name(
+                session, parent, telegram_file_data["name"]
+            )
+
+        if file:
+            return "updated", await FileService.update(session, file, telegram_file_data)
+
+        return "created", await FileService.create(session, telegram_file_data, parent)
+

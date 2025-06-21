@@ -73,8 +73,8 @@ async def file_handler(message: Message):
 
     message_file = await get_file_telegram_object(message)
     file_data = await extract_data_from_telegram_object(message_file)
-    file = await FileService.create(session, file_data, current_folder)
-    await message.answer(file.name)
+    action, file = await FileService.update_or_create(session, file_data, current_folder)
+    await message.answer(file.name + " " + action)
 
 
 
