@@ -1,6 +1,7 @@
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+import logging
 
 from storage.models import File, Folder
 from storage.schemas import FolderCreate, FolderUpdate
@@ -115,6 +116,16 @@ class FolderService:
         )
         result = await session.scalars(stmt)
         return result.first()
+
+    @staticmethod
+    async def get_current_folder(user: User, session: AsyncSession):
+
+        if user.current_folder is not None:
+            folder = user.current_folder
+            await session.refresh(folder)
+            return folder
+        # If current folder is None, return root folder
+        return await FolderService.get_root(session, user)
 
     @staticmethod
     async def delete(session: AsyncSession, folder: Folder):

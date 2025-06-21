@@ -8,6 +8,7 @@ from storage.dependencies import (
     get_folder_permission,
 )
 from storage.enums import Permission
+from storage.models import Folder
 from storage.schemas import (
     FolderCreate,
     FolderMove,
@@ -18,6 +19,7 @@ from storage.schemas import (
 from storage.service import FolderService
 from users.auth import UserDp
 
+
 storage_rt = APIRouter(prefix="/storage")
 
 
@@ -26,13 +28,26 @@ async def get_root(session: SessionDp, user: UserDp) -> RootFolderReadSchema:
     return await FolderService.get_root(session=session, user=user)
 
 
+@storage_rt.get("/folders/current", tags=["Папки"])
+async def get_current_folder(user: UserDp, session: SessionDp) -> FolderReadSchema:
+    return await FolderService.get_current_folder(user, session)
+
+
+@storage_rt.post("/folders/{folder_id}/current", tags=["Папки"])
+async def set_current_folder(folder: FolderReadPermission, user: UserDp, session: SessionDp) -> FolderReadSchema:
+    user.current_folder = folder
+    session.add(user)
+    await session.commit()
+    return folder
+
+
 @storage_rt.post("/folders", tags=["Папки"])
 async def create_folder(
     session: SessionDp,
     user: UserDp,
     folder_in: FolderCreate,
 ) -> FolderReadSchema:
-    parent = await get_folder_permission(Permission.CHANGE)(
+    parent = await get_folder_permission(Permission.WRITE)(
         folder_in.parent_id, user, session
     )
 
@@ -45,6 +60,7 @@ async def create_folder(
     result = await FolderService.create(session, folder_in, parent)
 
     return result
+
 
 
 @storage_rt.get("/folders/{folder_id}", tags=["Папки"])
@@ -84,6 +100,11 @@ async def move_folder(
 @storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
 async def delete_folder(session: SessionDp, folder: FolderChangePermission):
     await FolderService.delete(session, folder)
+
+
+# @storage_rt.get("/folders/{folder_id}", tags=["Файлы"])
+# async def get_file(file: FileReadPermission):
+#     return file
 
 
 # @storage_rt.post("/folders/{folder_id}/copy", tags=["Папки"])

@@ -2,25 +2,12 @@ from datetime import datetime
 import mimetypes
 from typing import List, Optional
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text, event
+from sqlalchemy import ForeignKey, Integer, String, Text, event
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from core.db import Base
 
-folder_editing_access = Table(
-    "folder_editing_access",
-    Base.metadata,
-    Column("folder_id", ForeignKey("folder.id"), primary_key=True),
-    Column("user_id", ForeignKey("user.id"), primary_key=True),
-)
-
-folder_view_access = Table(
-    "folder_view_access",
-    Base.metadata,
-    Column("folder_id", ForeignKey("folder.id"), primary_key=True),
-    Column("user_id", ForeignKey("user.id"), primary_key=True),
-)
 
 
 class Folder(Base):
@@ -45,16 +32,18 @@ class Folder(Base):
         lazy="selectin",
     )
     owner: Mapped["User"] = relationship(foreign_keys=[owner_id])
-    users_with_editing_access: Mapped[List["User"]] = relationship(
-        secondary=folder_editing_access, back_populates="shared_editable_folders"
-    )
-    users_with_view_access: Mapped[List["User"]] = relationship(
-        secondary=folder_view_access, back_populates="shared_viewable_folders"
-    )
+
     files: Mapped[List["File"]] = relationship(
         back_populates="parent",
         cascade="all, delete-orphan",
         lazy="selectin",
+    )
+
+    current_users: Mapped[List["User"]] = relationship(
+        back_populates="current_folder",
+        foreign_keys="[User.current_folder_id]",
+        lazy="selectin",
+        viewonly = True
     )
 
     def set_parent_owner(self) -> None:

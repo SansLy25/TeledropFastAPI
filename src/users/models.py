@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.db import Base
@@ -15,18 +16,20 @@ class User(Base):
     username: Mapped[Optional[str]]
     language_code: Mapped[Optional[str]]
     photo_url: Mapped[Optional[str]]
+    current_folder_id: Mapped[Optional[int]] = mapped_column(ForeignKey("folder.id"))
 
     all_owned_folders: Mapped[List["Folder"]] = relationship(
-        back_populates="owner", cascade="all, delete-orphan"
+        back_populates="owner",
+        cascade="all, delete-orphan",
+        foreign_keys="[Folder.owner_id]"
     )
 
-    shared_editable_folders: Mapped[List["Folder"]] = relationship(
-        secondary="folder_editing_access", back_populates="users_with_editing_access"
+    current_folder: Mapped["Folder"] = relationship(
+        foreign_keys="[User.current_folder_id]",
+        back_populates="current_users",
+        lazy="selectin",
     )
 
-    shared_viewable_folders: Mapped[List["Folder"]] = relationship(
-        secondary="folder_view_access", back_populates="users_with_view_access"
-    )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username='{self.username}')>"
