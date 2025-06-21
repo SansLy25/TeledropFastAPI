@@ -59,7 +59,7 @@ class File(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
-    type: Mapped[str] = mapped_column(String(50), default="other")
+    type: Mapped[str] = mapped_column(String(50), default="application/octet-stream")
     parent_id: Mapped[int] = mapped_column(ForeignKey("folder.id"))
     _path_cache: Mapped[Optional[str]] = mapped_column(
         "path", String(1000), nullable=True
@@ -86,7 +86,7 @@ class File(Base):
     def _detect_file_type(self, filename: str) -> None:
         mime_type, _ = mimetypes.guess_type(filename)
         if mime_type is None:
-            self.type = "other/other"
+            self.type = "application/octet-stream"
         else:
             self.type = mime_type
 
@@ -97,9 +97,9 @@ class FileVersion(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     version: Mapped[int]
-    telegram_file_id: Mapped[int]
+    telegram_file_id: Mapped[str]
     file_id: Mapped[int] = mapped_column(ForeignKey("file.id"))
-    size: Mapped[int]
+    size: Mapped[Optional[int]]
     file: Mapped["File"] = relationship(back_populates="versions")
 
 

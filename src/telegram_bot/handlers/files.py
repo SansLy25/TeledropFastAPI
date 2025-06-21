@@ -1,8 +1,14 @@
 from aiogram import F, Router
-from aiogram.types import Message, TelegramObject
+from aiogram.types import (
+    TelegramObject,
+    Voice,
+    VideoNote,
+    Sticker,
+    Message,
+    PhotoSize
+)
 
-from storage.models import Folder
-from storage.service import FolderService
+from storage.service import FolderService, FileService
 from telegram_bot.utils import get_db_session_for_bot
 from users.service import UserService
 
@@ -16,10 +22,27 @@ async def get_file_telegram_object(message: Message):
 
     return getattr(message, content_type)
 
-async def convert_telegram_object_to_model(
-    message_object: TelegramObject,
-):
-    pass
+async def extract_data_from_telegram_object(
+        message_object: TelegramObject,
+) -> dict:
+
+    file_data = {
+        "telegram_file_id": message_object.file_id,
+        "size": getattr(message_object, "file_size", None),
+        "type": getattr(message_object, "mime_type", None),
+    }
+
+    TYPES_CONVERT = {
+        Voice: "audio/ogg",
+        VideoNote: "video/mp4",
+        Sticker: "image/webp",
+        PhotoSize: "image/jpeg",
+    }
+
+    current_mime_type = file_data["type"]
+    file_data["type"] = current_mime_type or TYPES_CONVERT[type(message_object)]
+
+    return file_data
 
 
 @files_bot_rt.message(
@@ -44,9 +67,15 @@ async def file_handler(message: Message):
         session=session,
         tg_id=message.from_user.id
     )
-    current_folder = await FolderService.get()
+    current_folder = await FolderService.get_current_folder(user, session)
+
     message_file = await get_file_telegram_object(message)
-    file = await convert_telegram_object_to_model(message_file)
+    file_data = await extract_data_from_telegram_object(message_file)
+    file = await FileService.create(session, file_data, current_folder)
+    await message.answer(file.name)
+
+
+
 
 
 

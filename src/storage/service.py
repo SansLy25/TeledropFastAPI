@@ -1,9 +1,10 @@
-from sqlalchemy import select, text
+from datetime import datetime
+
+from sqlalchemy import select, text, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-import logging
 
-from storage.models import File, Folder
+from storage.models import File, Folder, FileVersion
 from storage.schemas import FolderCreate, FolderUpdate
 from users.models import User
 
@@ -47,7 +48,8 @@ class FolderService:
 
     @staticmethod
     async def update(
-        session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder
+            session: AsyncSession, folder_update_in: FolderUpdate,
+            folder: Folder
     ):
         for key, value in folder_update_in.model_dump().items():
             setattr(folder, key, value)
@@ -56,7 +58,8 @@ class FolderService:
         return folder
 
     @staticmethod
-    async def get_for_user_owner(session: AsyncSession, user: User, folder_id: int):
+    async def get_for_user_owner(session: AsyncSession, user: User,
+                                 folder_id: int):
         stmt = (
             select(Folder)
             .where(Folder.owner_id == user.id)
@@ -78,10 +81,12 @@ class FolderService:
         return result.first()
 
     @staticmethod
-    async def create(session: AsyncSession, folder_in: FolderCreate, parent=None):
+    async def create(session: AsyncSession, folder_in: FolderCreate,
+                     parent=None):
         if parent is None:
             parent = await FolderService.get(session, folder_in.parent_id)
-        folder = Folder(parent=parent, **folder_in.model_dump(exclude={"parent_id"}))
+        folder = Folder(parent=parent,
+                        **folder_in.model_dump(exclude={"parent_id"}))
         session.add(folder)
         await session.commit()
         await session.refresh(folder)
@@ -133,7 +138,8 @@ class FolderService:
         await session.commit()
 
     @staticmethod
-    async def move_folder(session: AsyncSession, folder: Folder, new_parent: Folder):
+    async def move_folder(session: AsyncSession, folder: Folder,
+                          new_parent: Folder):
         folder.parent = new_parent
         await session.commit()
         return folder
@@ -319,3 +325,49 @@ class FileService:
     @staticmethod
     async def get(session: AsyncSession, file_id):
         return await session.get(File, file_id)
+
+    @staticmethod
+    async def get_count_by_parent_and_name_contains(
+            session: AsyncSession, parent_id: int, name: str
+    ) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(File)
+            .where(File.parent_id == parent_id)
+            .where(File.name.contains(name))
+        )
+        result = await session.scalar(stmt)
+
+        return result or 0
+
+    @staticmethod
+    async def create(session: AsyncSession, file_data: dict,
+                     parent: Folder) -> File:
+
+        if not file_data.get("name"):
+            current_date = datetime.now()
+            file_type = file_data["type"].split("/")[
+                -1]
+            name = f"{current_date.strftime('%Y-%m-%d_%H-%M-%S')}.{file_type}"
+
+            count = await FileService.get_count_by_parent_and_name_contains(
+                session, parent.id,
+                name.split(".")[0])
+
+            if count > 0:
+                name = f"{name.split('.')[0]}_{count + 1}.{file_type}"
+
+            file_data["name"] = name
+
+        first_version = FileVersion(
+            version=1,
+            telegram_file_id=file_data["telegram_file_id"],
+            size=file_data["size"],
+        )
+
+        file = File(parent=parent, name=file_data["name"], type=file_data["type"], versions=[first_version])
+
+        session.add(file)
+        await session.commit()
+        await session.refresh(file)
+        return file
