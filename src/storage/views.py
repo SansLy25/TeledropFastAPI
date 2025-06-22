@@ -8,7 +8,6 @@ from storage.dependencies import (
     get_folder_permission,
 )
 from storage.enums import Permission
-from storage.models import Folder
 from storage.schemas import (
     FolderCreate,
     FolderMove,

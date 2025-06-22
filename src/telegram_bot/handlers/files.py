@@ -1,10 +1,11 @@
 from aiogram import F, Router
 from aiogram.types import TelegramObject, Voice, VideoNote, Sticker, Message, PhotoSize
-import logging
 
+from telegram_bot.utils import escape_markdown as _
 from storage.service import FolderService, FileService
 from telegram_bot.utils import get_db_session_for_bot
 from users.service import UserService
+
 
 files_bot_rt = Router()
 
@@ -67,4 +68,12 @@ async def file_upload_handler(message: Message):
     action, file = await FileService.update_or_create(
         session, file_data, current_folder
     )
-    await message.answer(file.name + " " + action)
+
+    if action == "created":
+        text = (f"Файл *{_(file.name)}* сохранен в папку *{_(file.parent.name)}*\n"
+                f"Путь: _{_(file.path)}_")
+    else:
+        text = (f"Файл *{_(file.name)}* был обновлен\n"
+                f"Cтарая версия файла доступна в *Версиях*")
+
+    await message.answer(text, parse_mode="MarkdownV2", disable_web_page_preview=True)
