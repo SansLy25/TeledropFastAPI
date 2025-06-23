@@ -70,10 +70,10 @@ async def file_upload_handler(message: Message):
     )
 
     if action == "created":
-        text = (f"📁 Файл *{_(file.name)}* сохранен в папку *{_(file.parent.name)}*\n"
+        text = (f"✅ *{_(file.name)}* сохранен в папку 📁 *{_(file.parent.name)}*\n\n"
                 f"🧭 Путь: _{_(file.path)}_")
     else:
-        text = (f"📁 Файл *{_(file.name)}* был обновлен\n"
+        text = (f"🔄 *{_(file.name)}* был обновлен\n\n"
                 f"❗️ Cтарая версия файла доступна в *Версиях*")
 
     await message.answer(text, parse_mode="MarkdownV2", disable_web_page_preview=True)
