@@ -6,17 +6,19 @@ from storage.dependencies import (
     FolderReadPermission,
     FolderWritePermission,
     FileReadPermission,
+    FileChangePermission,
     get_folder_by_permission,
 )
 from storage.enums import Permission
+from storage.utils import check_conflicts
 from storage.schemas import (
     FolderCreate,
     FolderMove,
     FolderReadSchema,
     FolderUpdate,
-    RootFolderReadSchema, FileReadSchema,
+    RootFolderReadSchema, FileReadSchema, FileUpdate,
 )
-from storage.service import FolderService
+from storage.service import FolderService, FileService
 from users.auth import UserDp
 
 
@@ -53,12 +55,7 @@ async def create_folder(
         folder_in.parent_id, user, session
     )
 
-    if await FolderService.get_by_name_and_parent(
-        session, folder_in.name, folder_in.parent_id
-    ):
-        raise HTTPException(
-            409, "Folder with this name already exists in parent folder"
-        )
+    await check_conflicts(parent, folder_in.name, session)
     result = await FolderService.create(session, folder_in, parent)
 
     return result
@@ -89,10 +86,8 @@ async def move_folder(
         folder_move.new_parent_id, user, session
     )
 
-    if await FolderService.get_by_name_and_parent(
-        session, moved_folder.name, folder_move.new_parent_id
-    ):
-        raise HTTPException(409, "Names conflict, rename folder")
+    await check_conflicts(folder_move.new_parent_id, moved_folder.name, session)
+
     folder = await FolderService.move_folder(session, moved_folder, new_parent)
     await FolderService.update_child_paths(session, folder)
     return folder
@@ -106,3 +101,9 @@ async def delete_folder(session: SessionDp, folder: FolderChangePermission):
 @storage_rt.get("/files/{object_id}", tags=["Файлы"])
 async def get_file(file: FileReadPermission) -> FileReadSchema:
     return file
+
+
+@storage_rt.patch("/files/{object_id}", tags=["Файлы"])
+async def update_file(session: SessionDp, file: FileChangePermission, file_update: FileUpdate) -> FileReadSchema:
+    return await FileService.create_new_version(session, file, file_update)
+

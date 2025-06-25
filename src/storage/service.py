@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from storage.models import File, Folder, FileVersion
-from storage.schemas import FolderCreate, FolderUpdate
+from storage.schemas import FolderCreate, FolderUpdate, FileUpdate
 from users.models import User
 
 
@@ -51,6 +51,8 @@ class FolderService:
     async def update(
         session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder
     ):
+        if await FolderService.get_by_name_and_parent(session, folder.name, folder.parent_id):
+            pass
         for key, value in folder_update_in.model_dump().items():
             setattr(folder, key, value)
 
@@ -390,7 +392,7 @@ class FileService:
         return file
 
     @staticmethod
-    async def update(session: AsyncSession, file: File, update_data: dict) -> File:
+    async def create_new_version(session: AsyncSession, file: File, update_data: dict) -> File:
         file.versions.append(
             FileVersion(
                 version=file.versions[-1].version + 1,
@@ -413,8 +415,20 @@ class FileService:
             )
 
         if file:
-            return "updated", await FileService.update(
+            return "updated", await FileService.create_new_version(
                 session, file, telegram_file_data
             )
 
         return "created", await FileService.create(session, telegram_file_data, parent)
+
+    # @staticmethod
+    # async def update(
+    #         session: AsyncSession,
+    #         file: File,
+    #         file_update_in: FileUpdate,
+    # ):
+    #     for key, value in file_update_in.model_dump().items():
+    #         setattr(file, key, value)
+    #
+    #     await session.commit()
+    #     return file

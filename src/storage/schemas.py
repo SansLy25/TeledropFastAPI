@@ -55,3 +55,11 @@ class FolderMove(BaseModel):
 class FileReadSchema(FileBaseSchema):
     parent_id: int
     type: str
+
+
+class FileUpdate(FolderUpdate):
+    pass
+
+
+class FileMove(FolderMove):
+    pass
