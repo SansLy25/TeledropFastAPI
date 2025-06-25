@@ -5,7 +5,8 @@ from storage.dependencies import (
     FolderChangePermission,
     FolderReadPermission,
     FolderWritePermission,
-    get_folder_permission,
+    FileReadPermission,
+    get_folder_by_permission,
 )
 from storage.enums import Permission
 from storage.schemas import (
@@ -13,7 +14,7 @@ from storage.schemas import (
     FolderMove,
     FolderReadSchema,
     FolderUpdate,
-    RootFolderReadSchema,
+    RootFolderReadSchema, FileReadSchema,
 )
 from storage.service import FolderService
 from users.auth import UserDp
@@ -32,7 +33,7 @@ async def get_current_folder(user: UserDp, session: SessionDp) -> FolderReadSche
     return await FolderService.get_current_folder(user, session)
 
 
-@storage_rt.post("/folders/{folder_id}/current", tags=["Папки"])
+@storage_rt.post("/folders/{object_id}/current", tags=["Папки"])
 async def set_current_folder(
     folder: FolderReadPermission, user: UserDp, session: SessionDp
 ) -> FolderReadSchema:
@@ -48,7 +49,7 @@ async def create_folder(
     user: UserDp,
     folder_in: FolderCreate,
 ) -> FolderReadSchema:
-    parent = await get_folder_permission(Permission.WRITE)(
+    parent = await get_folder_by_permission(Permission.WRITE)(
         folder_in.parent_id, user, session
     )
 
@@ -63,12 +64,12 @@ async def create_folder(
     return result
 
 
-@storage_rt.get("/folders/{folder_id}", tags=["Папки"])
+@storage_rt.get("/folders/{object_id}", tags=["Папки"])
 async def get_folder(folder: FolderReadPermission) -> FolderReadSchema:
     return folder
 
 
-@storage_rt.patch("/folders/{folder_id}", tags=["Папки"])
+@storage_rt.patch("/folders/{object_id}", tags=["Папки"])
 async def update_folder(
     session: SessionDp, folder: FolderChangePermission, folder_update: FolderUpdate
 ) -> FolderReadSchema:
@@ -77,14 +78,14 @@ async def update_folder(
     return updated_folder
 
 
-@storage_rt.post("/folders/{folder_id}/move", tags=["Папки"])
+@storage_rt.post("/folders/{object_id}/move", tags=["Папки"])
 async def move_folder(
     session: SessionDp,
     moved_folder: FolderWritePermission,
     folder_move: FolderMove,
     user: UserDp,
 ) -> FolderReadSchema:
-    new_parent = await get_folder_permission(Permission.WRITE)(
+    new_parent = await get_folder_by_permission(Permission.WRITE)(
         folder_move.new_parent_id, user, session
     )
 
@@ -97,26 +98,11 @@ async def move_folder(
     return folder
 
 
-@storage_rt.delete("/folders/{folder_id}", tags=["Папки"], status_code=204)
+@storage_rt.delete("/folders/{object_id}", tags=["Папки"], status_code=204)
 async def delete_folder(session: SessionDp, folder: FolderChangePermission):
     await FolderService.delete(session, folder)
 
 
-# @storage_rt.get("/folders/{folder_id}", tags=["Файлы"])
-# async def get_file(file: FileReadPermission):
-#     return file
-
-
-# @storage_rt.post("/folders/{folder_id}/copy", tags=["Папки"])
-# async def move_folder(
-#         session: SessionDp,
-#         moved_folder: FolderWritePermission,
-#         folder_copy: FolderMove,
-#         user: UserDp,
-# ):
-#     new_parent = await write_folder_permission(folder_copy.new_parent_id, user, session)
-#     folder = await FolderService.copy_folder(session, moved_folder, new_parent)
-#     await FolderService.update_child_paths(session, folder.parent)
-#     return folder
-
-# --- Эндпоинты файлов ---
+@storage_rt.get("/files/{object_id}", tags=["Файлы"])
+async def get_file(file: FileReadPermission) -> FileReadSchema:
+    return file

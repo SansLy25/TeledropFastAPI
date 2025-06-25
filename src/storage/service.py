@@ -1,5 +1,4 @@
 from datetime import datetime
-import logging
 from typing import Tuple
 
 from sqlalchemy import select, text, func

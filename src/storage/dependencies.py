@@ -3,7 +3,7 @@ from typing import Annotated, TypeVar
 from fastapi import Depends, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db import SessionDp, get_session
+from core.db import SessionDp, get_session, Base
 from storage.enums import Permission
 from storage.models import File, Folder
 from storage.service import FileService, FolderService
@@ -41,37 +41,47 @@ async def check_permission(
     return obj
 
 
-def get_folder_permission(permission: Permission = Permission.READ):
+def get_object_by_permission(permission: Permission = Permission.READ, model: Folder | File = Folder):
     async def wrapper(
-        folder_id: int = Path(...),
+        object_id: int = Path(...),
         user: User = Depends(get_or_create_user),
         session: AsyncSession = Depends(get_session),
-    ) -> Folder:
-        folder = await get_folder_or_404(session, user, folder_id)
-        return await check_permission(folder, user, permission, session)
+    ) -> Folder | File:
+        if model == Folder:
+            file_system_object = await get_folder_or_404(session, user,  object_id)
+        else:
+            file_system_object = await get_file_or_404(session, object_id)
+
+        return await check_permission(file_system_object, user, permission, session)
 
     return wrapper
 
 
-async def file_permission(
-    file_id: int = Path(...),
-    user: User = Depends(get_or_create_user),
-    session: AsyncSession = Depends(get_session),
-    permission: Permission = Permission.READ,
-) -> File:
-    file = await get_file_or_404(session, file_id)
-    return await check_permission(file, user, permission, session)
+def get_folder_by_permission(permission: Permission = Permission.READ):
+    """
+    Шорткат для папок
+    """
+    return get_object_by_permission(permission, Folder)
 
 
-FolderReadPermission = Annotated[Folder, Depends(get_folder_permission())]
+def get_file_by_permission(permission: Permission = Permission.READ):
+    """
+    Шорткат для файлов, немножко дублирования)
+    """
+    return get_object_by_permission(permission, File)
+
+
+FolderReadPermission = Annotated[Folder, Depends(get_folder_by_permission())]
 FolderWritePermission = Annotated[
-    Folder, Depends(get_folder_permission(permission=Permission.WRITE))
+    Folder, Depends(get_folder_by_permission(permission=Permission.WRITE))
 ]
 FolderChangePermission = Annotated[
-    Folder, Depends(get_folder_permission(permission=Permission.CHANGE))
+    Folder, Depends(get_folder_by_permission(permission=Permission.CHANGE))
 ]
 
-FileReadPermission = Annotated[File, Depends(file_permission)]
-FileWritePermission = Annotated[
-    File, Depends(lambda: file_permission(permission=Permission.WRITE))
+FileReadPermission = Annotated[
+    File, Depends(get_file_by_permission(permission=Permission.READ))
+]
+FileChangePermission = Annotated[
+    File, Depends(get_file_by_permission(permission=Permission.CHANGE))
 ]
