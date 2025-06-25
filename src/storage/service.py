@@ -421,14 +421,29 @@ class FileService:
 
         return "created", await FileService.create(session, telegram_file_data, parent)
 
-    # @staticmethod
-    # async def update(
-    #         session: AsyncSession,
-    #         file: File,
-    #         file_update_in: FileUpdate,
-    # ):
-    #     for key, value in file_update_in.model_dump().items():
-    #         setattr(file, key, value)
-    #
-    #     await session.commit()
-    #     return file
+    @staticmethod
+    async def update(
+            session: AsyncSession, file_update_in: FileUpdate, file: File
+    ):
+        for key, value in file_update_in.model_dump().items():
+            setattr(file, key, value)
+
+        await session.commit()
+        return file
+
+    @staticmethod
+    async def delete(
+            session: AsyncSession,
+            file: File,
+    ):
+        await session.delete(file)
+        await session.commit()
+
+    @staticmethod
+    async def move(
+            session: AsyncSession,
+            file: File,
+            new_parent_id: int,
+    ):
+        file.parent_id = new_parent_id
+        await session.commit()
