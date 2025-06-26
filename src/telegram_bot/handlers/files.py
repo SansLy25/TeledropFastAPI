@@ -1,7 +1,7 @@
 from aiogram import F, Router
 from aiogram.types import TelegramObject, Voice, VideoNote, Sticker, Message, PhotoSize
 
-from telegram_bot.utils import escape_markdown as _
+from telegram_bot.utils import escape_markdown as _, replace_slash
 from storage.service import FolderService, FileService
 from telegram_bot.utils import get_db_session_for_bot
 from users.service import UserService
@@ -71,9 +71,9 @@ async def file_upload_handler(message: Message):
 
     if action == "created":
         text = (f"✅ *{_(file.name)}* сохранен в папку 📁 *{_(file.parent.name)}*\n\n"
-                f"🧭 Путь: _{_(file.path)}_")
+                f"🧭 Путь: _{_(replace_slash(file.path))}_")
     else:
         text = (f"🔄 *{_(file.name)}* был обновлен\n\n"
                 f"❗️ Cтарая версия файла доступна в *Версиях*")
 
-    await message.answer(text, parse_mode="MarkdownV2", disable_web_page_preview=True)
+    await message.reply(text, parse_mode="MarkdownV2", disable_web_page_preview=True)

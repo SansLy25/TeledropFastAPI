@@ -1,4 +1,6 @@
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from fastapi import APIRouter, HTTPException
+from fastapi.params import Query
 
 from core.db import SessionDp
 from storage.dependencies import (
@@ -20,6 +22,7 @@ from storage.schemas import (
 )
 from storage.service import FolderService, FileService
 from users.auth import UserDp
+from telegram_bot.download import telegram_download_file
 
 
 storage_rt = APIRouter(prefix="/storage")
@@ -110,6 +113,22 @@ async def move_file(
     )
     await check_conflicts(new_parent, file.name, session)
     return await FileService.move(session, file, file_move.new_parent_id)
+
+
+@storage_rt.post("/files/{object_id}/download", tags=["Файлы"])
+async def download_file(
+        session: SessionDp,
+        file: FileReadPermission,
+        user: UserDp,
+        version: int = Query(1),
+):
+    try:
+        await telegram_download_file(file, version, user, session)
+    except TelegramBadRequest:
+        raise HTTPException(404, "This version deleted from Telegram servers")
+    except TelegramForbiddenError:
+        raise HTTPException(403, "Bot clocked by user")
+
 
 
 @storage_rt.get("/files/{object_id}", tags=["Файлы"])

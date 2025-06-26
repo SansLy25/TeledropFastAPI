@@ -322,7 +322,7 @@ class FolderService:
 class FileService:
     @staticmethod
     async def get(session: AsyncSession, file_id):
-        return await session.get(File, file_id)
+        return await session.get(File, file_id, options=[selectinload(File.versions)])
 
     @staticmethod
     async def get_count_by_parent_and_name_contains(
@@ -447,3 +447,18 @@ class FileService:
     ):
         file.parent_id = new_parent_id
         await session.commit()
+
+    @staticmethod
+    async def get_version(
+            file: File,
+            version: int,
+            session: AsyncSession
+    ):
+        if version < 0:
+            return None
+
+        try:
+            await session.refresh(file)
+            return file.versions[version - 1]
+        except IndexError:
+            return None

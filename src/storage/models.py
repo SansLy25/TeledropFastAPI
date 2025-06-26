@@ -68,6 +68,7 @@ class File(Base):
         back_populates="file",
         cascade="all, delete-orphan",
         order_by="FileVersion.version",
+        lazy="selectin"
     )
 
     @hybrid_property
