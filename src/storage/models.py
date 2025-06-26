@@ -70,6 +70,7 @@ class File(Base):
         order_by="FileVersion.version",
         lazy="selectin"
     )
+    is_telegram_photo: Mapped[bool] = mapped_column(default=False)
 
     @hybrid_property
     def path(self) -> str:

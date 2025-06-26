@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import F, Router
 from aiogram.types import TelegramObject, Voice, VideoNote, Sticker, Message, PhotoSize
 
@@ -27,6 +29,7 @@ async def extract_data_from_telegram_object(
         "size": getattr(message_object, "file_size", None),
         "type": getattr(message_object, "mime_type", None),
         "name": getattr(message_object, "file_name", None),
+        "is_telegram_photo": isinstance(message_object, PhotoSize)
     }
 
     TYPES_CONVERT = {
@@ -70,7 +73,7 @@ async def file_upload_handler(message: Message):
     )
 
     if action == "created":
-        text = (f"✅ *{_(file.name)}* сохранен в папку 📁 *{_(file.parent.name)}*\n\n"
+        text = (f"✅ *{_(file.name)}* сохранен\n\n"
                 f"🧭 Путь: _{_(replace_slash(file.path))}_")
     else:
         text = (f"🔄 *{_(file.name)}* был обновлен\n\n"

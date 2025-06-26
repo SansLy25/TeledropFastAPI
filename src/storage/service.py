@@ -385,6 +385,7 @@ class FileService:
             name=telegram_file_data["name"],
             type=telegram_file_data["type"],
             versions=[first_version],
+            is_telegram_photo=telegram_file_data["is_telegram_photo"]
         )
         session.add(file)
         await session.commit()
