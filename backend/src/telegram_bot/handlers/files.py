@@ -29,7 +29,7 @@ async def extract_data_from_telegram_object(
         "size": getattr(message_object, "file_size", None),
         "type": getattr(message_object, "mime_type", None),
         "name": getattr(message_object, "file_name", None),
-        "is_telegram_photo": isinstance(message_object, PhotoSize)
+        "is_telegram_photo": isinstance(message_object, PhotoSize),
     }
 
     TYPES_CONVERT = {
@@ -73,10 +73,14 @@ async def file_upload_handler(message: Message):
     )
 
     if action == "created":
-        text = (f"✅ *{_(file.name)}* сохранен\n\n"
-                f"🧭 Путь: _{_(replace_slash(file.path))}_")
+        text = (
+            f"✅ *{_(file.name)}* сохранен\n\n"
+            f"🧭 Путь: _{_(replace_slash(file.path))}_"
+        )
     else:
-        text = (f"🔄 *{_(file.name)}* был обновлен\n\n"
-                f"❗️ Cтарая версия файла доступна в *Версиях*")
+        text = (
+            f"🔄 *{_(file.name)}* был обновлен\n\n"
+            f"❗️ Cтарая версия файла доступна в *Версиях*"
+        )
 
     await message.reply(text, parse_mode="MarkdownV2", disable_web_page_preview=True)

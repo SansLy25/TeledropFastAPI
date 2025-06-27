@@ -18,7 +18,10 @@ from storage.schemas import (
     FolderMove,
     FolderReadSchema,
     FolderUpdate,
-    RootFolderReadSchema, FileReadSchema, FileUpdate, FileMove,
+    RootFolderReadSchema,
+    FileReadSchema,
+    FileUpdate,
+    FileMove,
 )
 from storage.service import FolderService, FileService
 from users.auth import UserDp
@@ -103,10 +106,7 @@ async def delete_folder(session: SessionDp, folder: FolderChangePermission):
 
 @storage_rt.post("/files/{object_id}/move", tags=["Файлы"])
 async def move_file(
-        session: SessionDp,
-        file: FileChangePermission,
-        file_move: FileMove,
-        user: UserDp
+    session: SessionDp, file: FileChangePermission, file_move: FileMove, user: UserDp
 ):
     new_parent = await get_folder_by_permission(Permission.WRITE)(
         file_move.new_parent_id, user, session
@@ -117,10 +117,10 @@ async def move_file(
 
 @storage_rt.post("/files/{object_id}/download", tags=["Файлы"])
 async def download_file(
-        session: SessionDp,
-        file: FileReadPermission,
-        user: UserDp,
-        version: int = Query(1),
+    session: SessionDp,
+    file: FileReadPermission,
+    user: UserDp,
+    version: int = Query(1),
 ):
     try:
         await telegram_download_file(file, version, user, session)
@@ -130,14 +130,15 @@ async def download_file(
         raise HTTPException(403, "Bot clocked by user")
 
 
-
 @storage_rt.get("/files/{object_id}", tags=["Файлы"])
 async def get_file(file: FileReadPermission) -> FileReadSchema:
     return file
 
 
 @storage_rt.patch("/files/{object_id}", tags=["Файлы"])
-async def update_file(session: SessionDp, file: FileChangePermission, file_update: FileUpdate) -> FileReadSchema:
+async def update_file(
+    session: SessionDp, file: FileChangePermission, file_update: FileUpdate
+) -> FileReadSchema:
     if file_update.name:
         await check_conflicts(file.parent, file_update.name, session)
     return await FileService.update(session, file_update, file)

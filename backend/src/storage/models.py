@@ -68,7 +68,7 @@ class File(Base):
         back_populates="file",
         cascade="all, delete-orphan",
         order_by="FileVersion.version",
-        lazy="selectin"
+        lazy="selectin",
     )
     is_telegram_photo: Mapped[bool] = mapped_column(default=False)
 

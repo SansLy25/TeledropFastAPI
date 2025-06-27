@@ -3,7 +3,7 @@ import re
 
 
 def escape_markdown(text: str):
-    return re.sub(r'([_*\[\]()~`>#+\-=|{}\.!])', r'\\\1', text)
+    return re.sub(r"([_*\[\]()~`>#+\-=|{}\.!])", r"\\\1", text)
 
 
 def replace_slash(text: str):

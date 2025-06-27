@@ -41,14 +41,16 @@ async def check_permission(
     return obj
 
 
-def get_object_by_permission(permission: Permission = Permission.READ, model: Folder | File = Folder):
+def get_object_by_permission(
+    permission: Permission = Permission.READ, model: Folder | File = Folder
+):
     async def wrapper(
         object_id: int = Path(...),
         user: User = Depends(get_or_create_user),
         session: AsyncSession = Depends(get_session),
     ) -> Folder | File:
         if model == Folder:
-            file_system_object = await get_folder_or_404(session, user,  object_id)
+            file_system_object = await get_folder_or_404(session, user, object_id)
         else:
             file_system_object = await get_file_or_404(session, object_id)
 

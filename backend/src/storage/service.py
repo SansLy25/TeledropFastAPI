@@ -51,7 +51,9 @@ class FolderService:
     async def update(
         session: AsyncSession, folder_update_in: FolderUpdate, folder: Folder
     ):
-        if await FolderService.get_by_name_and_parent(session, folder.name, folder.parent_id):
+        if await FolderService.get_by_name_and_parent(
+            session, folder.name, folder.parent_id
+        ):
             pass
         for key, value in folder_update_in.model_dump().items():
             setattr(folder, key, value)
@@ -385,7 +387,7 @@ class FileService:
             name=telegram_file_data["name"],
             type=telegram_file_data["type"],
             versions=[first_version],
-            is_telegram_photo=telegram_file_data["is_telegram_photo"]
+            is_telegram_photo=telegram_file_data["is_telegram_photo"],
         )
         session.add(file)
         await session.commit()
@@ -393,7 +395,9 @@ class FileService:
         return file
 
     @staticmethod
-    async def create_new_version(session: AsyncSession, file: File, update_data: dict) -> File:
+    async def create_new_version(
+        session: AsyncSession, file: File, update_data: dict
+    ) -> File:
         file.versions.append(
             FileVersion(
                 version=file.versions[-1].version + 1,
@@ -423,9 +427,7 @@ class FileService:
         return "created", await FileService.create(session, telegram_file_data, parent)
 
     @staticmethod
-    async def update(
-            session: AsyncSession, file_update_in: FileUpdate, file: File
-    ):
+    async def update(session: AsyncSession, file_update_in: FileUpdate, file: File):
         for key, value in file_update_in.model_dump().items():
             setattr(file, key, value)
 
@@ -434,27 +436,23 @@ class FileService:
 
     @staticmethod
     async def delete(
-            session: AsyncSession,
-            file: File,
+        session: AsyncSession,
+        file: File,
     ):
         await session.delete(file)
         await session.commit()
 
     @staticmethod
     async def move(
-            session: AsyncSession,
-            file: File,
-            new_parent_id: int,
+        session: AsyncSession,
+        file: File,
+        new_parent_id: int,
     ):
         file.parent_id = new_parent_id
         await session.commit()
 
     @staticmethod
-    async def get_version(
-            file: File,
-            version: int,
-            session: AsyncSession
-    ):
+    async def get_version(file: File, version: int, session: AsyncSession):
         if version < 0:
             return None
 
