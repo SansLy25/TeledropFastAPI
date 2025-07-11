@@ -1,11 +1,11 @@
 import React from 'react';
-
+import LargeContainer from '../components/components/LargeContainer.jsx';
 
 function Main({ children }) {
     return (
-        <div className="dark:bg-neutral-900 text-white rounded-2xl dark:border dark:border-neutral-800 h-full">
+        <LargeContainer className="h-full">
             {children}
-        </div>
+        </LargeContainer>
     )
 }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Folder, Image, Blocks, Users } from 'lucide-react'
 import NavigationItem from "../ui/NavigationItem.jsx";
+import LargeContainer from '../components/LargeContainer.jsx';
 
 function Navigation() {
     const NAVIGATION_ITEMS = [
@@ -26,9 +27,9 @@ function Navigation() {
         }
     ]
     return (
-        <div className="flex justify-center gap-10 align-middle dark:bg-neutral-900 rounded-2xl dark:border dark:border-neutral-800 h-[5.5rem]">
+        <LargeContainer className="flex justify-center gap-10 align-middle h-[5.5rem]">
             {NAVIGATION_ITEMS.map((item) => (<NavigationItem {...item} />))}
-        </div>
+        </LargeContainer>
     )
 }
 
