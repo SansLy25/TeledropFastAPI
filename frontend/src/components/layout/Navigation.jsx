@@ -26,7 +26,7 @@ function Navigation() {
         }
     ]
     return (
-        <div className="flex justify-center gap-9 align-middle dark:bg-neutral-900 rounded-2xl dark:border dark:border-neutral-800 h-[5.5rem]">
+        <div className="flex justify-center gap-10 align-middle dark:bg-neutral-900 rounded-2xl dark:border dark:border-neutral-800 h-[5.5rem]">
             {NAVIGATION_ITEMS.map((item) => (<NavigationItem {...item} />))}
         </div>
     )

@@ -8,7 +8,6 @@ function Files() {
         <div className="flex flex-col dark:bg-neutral-950 h-screen w-screen p-2 py-2.75 gap-2.5">
             <Header/>
             <Main>
-
             </Main>
             <Navigation/>
         </div>
