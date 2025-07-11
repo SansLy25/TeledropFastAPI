@@ -3,9 +3,11 @@ import LargeContainer from '../containers/LargeContainer.jsx';
 
 function Main({ children }) {
     return (
-        <LargeContainer className="h-full">
-            {children}
-        </LargeContainer>
+        <main className="h-full">
+            <LargeContainer className="h-full flex flex-row">
+                {children}
+            </LargeContainer>
+        </main>
     )
 }
 
