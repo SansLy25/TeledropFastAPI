@@ -4,7 +4,7 @@ import LargeContainer from '../containers/LargeContainer.jsx';
 function Main({ children }) {
     return (
         <main className="h-full">
-            <LargeContainer className="h-full flex flex-row">
+            <LargeContainer className="h-full flex flex-row p-[0.7rem]">
                 {children}
             </LargeContainer>
         </main>

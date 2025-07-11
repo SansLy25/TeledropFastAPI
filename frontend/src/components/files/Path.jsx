@@ -10,9 +10,9 @@ function Path({path}) {
         <div className="flex flex-row gap-1">
             {
                 path_items.map((item, index) => (
-                    <div key={index} className="flex justify-center items-center gap-1">
+                    <div key={index} className="flex justify-center text-[0.65rem] items-center gap-0.5 dark:text-neutral-400 font-medium">
                         <div>{item}</div>
-                        <ChevronRight width={"15px"} height={"15px"}/>
+                        <ChevronRight width={"12px"} height={"12px"} className="mt-0.5"/>
                     </div>))
             }
         </div>
