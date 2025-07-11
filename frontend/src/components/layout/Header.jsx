@@ -1,7 +1,7 @@
 import React from 'react';
 import {Book} from "lucide-react";
 import Search from "../ui/Search.jsx";
-import LargeContainer from '../components/components/LargeContainer.jsx';
+import LargeContainer from '../containers/LargeContainer.jsx';
 
 function Header() {
     return (

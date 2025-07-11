@@ -1,5 +1,5 @@
 import React from 'react';
-import LargeContainer from '../components/components/LargeContainer.jsx';
+import LargeContainer from '../containers/LargeContainer.jsx';
 
 function Main({ children }) {
     return (

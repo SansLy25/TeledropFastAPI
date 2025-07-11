@@ -1,7 +1,7 @@
 import React from 'react';
 import { Folder, Image, Blocks, Users } from 'lucide-react'
 import NavigationItem from "../ui/NavigationItem.jsx";
-import LargeContainer from '../components/LargeContainer.jsx';
+import LargeContainer from '../containers/LargeContainer.jsx';
 
 function Navigation() {
     const NAVIGATION_ITEMS = [
