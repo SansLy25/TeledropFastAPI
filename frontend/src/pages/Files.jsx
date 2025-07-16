@@ -6,19 +6,19 @@ import Path from "../components/files/Path.jsx";
 import {ArrowLeft, Menu, ArrowDownNarrowWide, Grip} from "lucide-react";
 import ContextMenu from "../components/ui/ContextMenu.jsx";
 import BorderButton from "../components/ui/BorderButton.jsx";
-
+import ListFileView from "../components/files/ListFileView.jsx";
 
 function Files() {
     return (
         <div className="flex flex-col dark:bg-neutral-950 h-screen w-screen p-2 py-2 gap-2.5">
             <Header/>
             <Main>
-                <div className="w-full">
+                <div className="w-full flex flex-col">
                     <div>
                         <Path path="/море2077/"/>
                     </div>
                     <div className="flex flex-row justify-between mt-[0.6rem]">
-                        <div className="flex flex-row items-center ml-[-0.25rem] gap-1">
+                        <div className="flex flex-row items-center gap-2">
                             <button onClick={(e) => {alert("клик")}} className="flex items-center justify-center">
                                 <ArrowLeft width={"27px"} height={"27px"}/>
                             </button>
@@ -27,7 +27,7 @@ function Files() {
                             </div>
                             <Menu width={"25px"} height={"25px"} className="mt-0.5"/>
                         </div>
-                        <div className="flex flex-row items-start gap-1.5">
+                        <div className="flex flex-row items-start gap-2">
                             <ContextMenu actionElement={<BorderButton><ArrowDownNarrowWide width={"22px"} height={"22px"}/><div>Сорт.</div></BorderButton>}>
                                 <div></div>
                             </ContextMenu>
@@ -36,6 +36,10 @@ function Files() {
                             </ContextMenu>
                         </div>
                     </div>
+                    <ListFileView
+                        files={[{name: "Видео.mov"}, {name: "Изображение.png"}, {name: "текст.txt"}]}
+                        folders={[{name: "Море"}, {name: "Моя любимая папка"}, {name: "Папка с большим названием"}]}
+                    />
                 </div>
             </Main>
             <Navigation/>
