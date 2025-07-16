@@ -3,7 +3,9 @@ import Header from "../components/layout/Header.jsx";
 import Main from "../components/layout/Main.jsx";
 import Navigation from "../components/layout/Navigation.jsx";
 import Path from "../components/files/Path.jsx";
-import {ArrowLeft, Menu} from "lucide-react";
+import {ArrowLeft, Menu, ArrowDownNarrowWide, Grip} from "lucide-react";
+import ContextMenu from "../components/ui/ContextMenu.jsx";
+import BorderButton from "../components/ui/BorderButton.jsx";
 
 
 function Files() {
@@ -13,22 +15,25 @@ function Files() {
             <Main>
                 <div className="w-full">
                     <div>
-                        <Path path="/дом/Море2007/"/>
+                        <Path path="/море2077/"/>
                     </div>
-                    <div className="flex flex-row justify-between mt-[0.5rem]">
+                    <div className="flex flex-row justify-between mt-[0.6rem]">
                         <div className="flex flex-row items-center ml-[-0.25rem] gap-1">
                             <button onClick={(e) => {alert("клик")}} className="flex items-center justify-center">
                                 <ArrowLeft width={"27px"} height={"27px"}/>
                             </button>
-                            <div className="text-xl font-semibold">
+                            <div className="text-xl font-medium">
                                 Новая папка
                             </div>
                             <Menu width={"25px"} height={"25px"} className="mt-0.5"/>
                         </div>
-                        <div className="flex flex-row items-center">
-                            <div>
-                                Конец
-                            </div>
+                        <div className="flex flex-row items-start gap-1.5">
+                            <ContextMenu actionElement={<BorderButton><ArrowDownNarrowWide width={"22px"} height={"22px"}/><div>Сорт.</div></BorderButton>}>
+                                <div></div>
+                            </ContextMenu>
+                            <ContextMenu actionElement={<BorderButton><Grip width={"22px"} height={"22px"}/><div>Вид</div></BorderButton>}>
+                                <div></div>
+                            </ContextMenu>
                         </div>
                     </div>
                 </div>
