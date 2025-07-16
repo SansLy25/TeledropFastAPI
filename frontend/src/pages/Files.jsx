@@ -17,10 +17,10 @@ function Files() {
                     <div>
                         <Path path="/море2077/"/>
                     </div>
-                    <div className="flex flex-row justify-between mt-[0.6rem]">
+                    <div className="flex flex-row justify-between mt-[0.5rem]">
                         <div className="flex flex-row items-center gap-2">
-                            <button onClick={(e) => {alert("клик")}} className="flex items-center justify-center">
-                                <ArrowLeft width={"27px"} height={"27px"}/>
+                            <button onClick={(e) => {alert("клик")}} className="flex items-center justify-center ml-[-0.2rem]">
+                                <ArrowLeft width={"26px"} height={"26px"}/>
                             </button>
                             <div className="text-xl font-medium">
                                 Новая папка
@@ -28,10 +28,10 @@ function Files() {
                             <Menu width={"25px"} height={"25px"} className="mt-0.5"/>
                         </div>
                         <div className="flex flex-row items-start gap-2">
-                            <ContextMenu actionElement={<BorderButton><ArrowDownNarrowWide width={"22px"} height={"22px"}/><div>Сорт.</div></BorderButton>}>
+                            <ContextMenu actionElement={<BorderButton><ArrowDownNarrowWide width={"20px"} height={"20px"}/><div>Сорт.</div></BorderButton>}>
                                 <div></div>
                             </ContextMenu>
-                            <ContextMenu actionElement={<BorderButton><Grip width={"22px"} height={"22px"}/><div>Вид</div></BorderButton>}>
+                            <ContextMenu actionElement={<BorderButton><Grip width={"20px"} height={"20px"}/><div>Вид</div></BorderButton>}>
                                 <div></div>
                             </ContextMenu>
                         </div>
