@@ -3,9 +3,9 @@ import React from "react";
 function FileSystemItem({ name, icon, alt, view = "big", editable = true }) {
     if (view === "big") {
         return (
-            <div className="flex flex-col items-center justify-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-900 rounded-lg transition-colors">
-                <img src={icon} alt={alt} className="w-28 h-28 sm:w-32 sm:h-32" />
-                <div className="mt-3 text-center text-base font-medium truncate max-w-[120px] sm:max-w-[150px]">
+            <div className="flex flex-col items-center justify-start p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-900 rounded-lg transition-colors">
+                <img src={icon} alt={alt} className="w-21 h-21" />
+                <div className="mt-1 text-center line-clamp-2 text-[0.65rem] font-medium max-w-[120px] sm:max-w-[150px]">
                     {name}
                 </div>
             </div>
@@ -14,7 +14,7 @@ function FileSystemItem({ name, icon, alt, view = "big", editable = true }) {
         return (
             <div className="flex items-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-900 rounded-lg transition-colors">
                 <img src={icon} alt={alt} className="w-8 h-8 mr-4" />
-                <div className="text-base font-medium truncate">
+                <div className="text-sm font-medium truncate">
                     {name}
                 </div>
             </div>
