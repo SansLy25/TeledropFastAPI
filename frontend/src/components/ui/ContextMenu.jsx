@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMenuContext } from '../../contexts/MenuContext';
 
 function ContextMenu({children, actionElement}) {
-    const [isOpened, setIsOpened] = useState(false);
     const [actionElementSize, setActionElementSize] = useState({ width: 0, height: 0 });
     const actionElementRef = useRef(null);
+    const { openMenuKey, setOpenMenuKey } = useMenuContext();
 
-    function onActionElementClick(event) {
-        setIsOpened(!isOpened);
+    const keyRef = useRef(Symbol("menu"));
+    const menuRef = useRef(null);
+    const isOpened = openMenuKey === keyRef.current;
+
+    function onActionElementClick() {
+        setOpenMenuKey(isOpened ? null : keyRef.current);
     }
 
     const enhancedActionElement = React.cloneElement(actionElement, {
@@ -20,6 +25,21 @@ function ContextMenu({children, actionElement}) {
             setActionElementSize({ width: offsetWidth, height: offsetHeight });
         }
     }, [isOpened]);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setOpenMenuKey(null);
+            }
+        }
+
+        if (isOpened) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpened, setOpenMenuKey]);
 
     return (
         <div className="relative">
