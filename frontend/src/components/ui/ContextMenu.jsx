@@ -6,12 +6,23 @@ function ContextMenu({children, actionElement}) {
     const actionElementRef = useRef(null);
     const { openMenuKey, setOpenMenuKey } = useMenuContext();
 
-    const keyRef = useRef(Symbol("menu"));
+    const keyRef = useRef(null);
     const menuRef = useRef(null);
+
+    useEffect(() => {
+        if (keyRef.current === null) {
+            keyRef.current = Symbol("menu");
+        }
+    }, []);
+
     const isOpened = openMenuKey === keyRef.current;
 
     function onActionElementClick() {
-        setOpenMenuKey(isOpened ? null : keyRef.current);
+        if (openMenuKey === keyRef.current) {
+            setOpenMenuKey(null);
+        } else {
+            setOpenMenuKey(keyRef.current);
+        }
     }
 
     const enhancedActionElement = React.cloneElement(actionElement, {
@@ -44,14 +55,17 @@ function ContextMenu({children, actionElement}) {
     return (
         <div className="relative">
             {enhancedActionElement}
-            {isOpened && (
-                <div
-                    className="absolute size-10 rounded-xl bg-amber-100"
-                    style={{ top: actionElementSize.height + 'px', left: "0",  zIndex: "9999"}}
-                >
-                    {children}
-                </div>
-            )}
+            <div
+                ref={menuRef}
+                className={`dark:bg-neutral-900 text-white rounded-2xl dark:border-[1.3px] dark:border-neutral-800 absolute w-60 h-96 transition-all duration-150 ease-in-out ${
+                    isOpened 
+                    ? "opacity-100 translate-y-0 scale-100" 
+                    : "opacity-0 translate-y-1 scale-95 pointer-events-none"
+                }`}
+                style={{ top: (+actionElementSize.height + 5) + 'px', left: "0",  zIndex: "9999"}}
+            >
+                {children}
+            </div>
         </div>
     );
 }
