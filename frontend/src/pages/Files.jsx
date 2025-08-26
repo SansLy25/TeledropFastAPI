@@ -32,10 +32,10 @@ function Files() {
                         </div>
                         <div className="flex flex-row items-start gap-2">
                             <ContextMenu borderElementRef={borderMenuComponentRef} actionElement={<BorderButton><ArrowDownNarrowWide width={"20px"} height={"20px"}/><div>Сорт.</div></BorderButton>}>
-                                <div></div>
+                                <div className="w-1/2">ДЛОЫВАОЛДЫВОАЛДДОЛЫАВДОЛАЫВДЛОВЫАДОЛоваолплдоывалопрролвыаполрываролдпрдоывалпродывлароплродываролпролдываплродывалдопролдываропрлодпывалродвапыолдрвапыолдрапвырдовпаыолрдвапыролывапрлодпордывалодплдроываплодрывалдоплодрывалподываропорлывалдпролдвыорапролывроларолапвыролыаролраплорлдыопалдроыпарлодпыаролыапвлроыдапрлопадролапыролда</div>
                             </ContextMenu>
                             <ContextMenu borderElementRef={borderMenuComponentRef} actionElement={<BorderButton><Grip width={"20px"} height={"20px"}/><div>Вид</div></BorderButton>}>
-                                <div></div>
+                                <div className="w-1/2"></div>
                             </ContextMenu>
                         </div>
                     </div>

@@ -1,12 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMenuContext } from '../../contexts/MenuContext';
 
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkIsMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkIsMobile();
+
+        window.addEventListener('resize', checkIsMobile);
+
+        return () => window.removeEventListener('resize', checkIsMobile);
+    }, []);
+
+    return isMobile;
+}
+
 function ContextMenu({children, actionElement, borderElementRef}) {
     const [actionElementSize, setActionElementSize] = useState({ width: 0, height: 0 });
     const [menuPosition, setMenuPosition] = useState({ left: 0 });
     const [positionCalculated, setPositionCalculated] = useState(false);
+    const [touchStartY, setTouchStartY] = useState(null);
+    const [swipeOffset, setSwipeOffset] = useState(0);
     const actionElementRef = useRef(null);
     const { openMenuKey, setOpenMenuKey } = useMenuContext();
+    const isMobile = useIsMobile();
 
     const keyRef = useRef(null);
     const menuRef = useRef(null);
@@ -39,7 +60,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
         }
     }, [isOpened]);
 
-    useEffect(() => {
+    const calculateDesktopPosition = () => {
         if (isOpened && menuRef.current && borderElementRef && borderElementRef.current) {
             const menuWidth = menuRef.current.offsetWidth;
 
@@ -75,7 +96,18 @@ function ContextMenu({children, actionElement, borderElementRef}) {
         } else if (!isOpened) {
             setPositionCalculated(false);
         }
-    }, [isOpened, actionElementSize, borderElementRef]);
+    };
+
+    useEffect(() => {
+        if (!isMobile) {
+            calculateDesktopPosition();
+        } else if (isOpened) {
+            setPositionCalculated(true);
+            setSwipeOffset(0);
+        } else {
+            setPositionCalculated(false);
+        }
+    }, [isOpened, actionElementSize, borderElementRef, isMobile]);
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -86,7 +118,6 @@ function ContextMenu({children, actionElement, borderElementRef}) {
             ) {
                 setOpenMenuKey(null);
             }
-
         }
 
         if (isOpened) {
@@ -97,18 +128,96 @@ function ContextMenu({children, actionElement, borderElementRef}) {
         };
     }, [isOpened, setOpenMenuKey]);
 
+    const handleTouchStart = (e) => {
+        if (isMobile) {
+            setTouchStartY(e.touches[0].clientY);
+            setSwipeOffset(0);
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (isMobile && touchStartY !== null) {
+            const touchY = e.touches[0].clientY;
+            const diff = touchY - touchStartY;
+
+            if (diff > 0) {
+                setSwipeOffset(diff * 0.8);
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (swipeOffset > 40) {
+            setOpenMenuKey(null);
+        }
+
+        setTouchStartY(null);
+        if (swipeOffset < 100) {
+            setSwipeOffset(0);
+        }
+    };
+
+    const getMenuStyle = () => {
+        if (isMobile) {
+            const swipeOpacity = swipeOffset > 0 
+                ? Math.max(1 - (swipeOffset / 200), 0.5)
+                : 1;
+
+            return {
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 9999,
+                visibility: isOpened && positionCalculated ? 'visible' : 'hidden',
+                transform: swipeOffset > 0 ? `translateY(${swipeOffset}px)` : 'none',
+                opacity: swipeOpacity,
+                height: '50%',
+                boxShadow: swipeOffset > 0 ? 'none' : '0 -4px 12px rgba(0, 0, 0, 0.1)'
+            };
+        } else {
+            return {
+                top: (+actionElementSize.height + 5) + 'px',
+                left: menuPosition.left + 'px',
+                zIndex: 9999,
+                visibility: isOpened && !positionCalculated ? 'hidden' : 'visible'
+            };
+        }
+    };
+
+    const getMenuClassName = () => {
+        const baseClasses = 'dark:bg-neutral-900 text-white dark:border-[1.3px] dark:border-neutral-800';
+        const transitionClasses = swipeOffset > 0 ? 'transition-transform' : 'transition-all duration-300 ease-in-out';
+
+        const desktopStateClasses = isOpened && positionCalculated
+            ? "opacity-100 translate-y-0 scale-100" 
+            : "opacity-0 translate-y-1 scale-95 pointer-events-none";
+
+        const mobileStateClasses = isOpened && positionCalculated
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-full pointer-events-none";
+
+        if (isMobile) {
+            return `${baseClasses} ${transitionClasses} ${mobileStateClasses} fixed bottom-0 left-0 right-0 w-full rounded-t-2xl overflow-auto`;
+        } else {
+            return `${baseClasses} ${transitionClasses} ${desktopStateClasses} absolute w-60 h-96 rounded-2xl`;
+        }
+    };
+
     return (
         <div className="relative">
             {enhancedActionElement}
             <div
                 ref={menuRef}
-                className={`dark:bg-neutral-900 text-white rounded-2xl dark:border-[1.3px] dark:border-neutral-800 absolute w-60 h-96 transition-all duration-150 ease-in-out ${
-                    isOpened && positionCalculated
-                    ? "opacity-100 translate-y-0 scale-100" 
-                    : "opacity-0 translate-y-1 scale-95 pointer-events-none"
-                }`}
-                style={{ top: (+actionElementSize.height + 5) + 'px', left: menuPosition.left + 'px',  zIndex: "9999", visibility: isOpened && !positionCalculated ? 'hidden' : 'visible' }}
+                className={getMenuClassName()}
+                style={getMenuStyle()}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
+                {isMobile && (
+                    <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2 mb-4" />
+                )}
                 {children}
             </div>
         </div>
