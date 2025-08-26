@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import LargeContainer from '../containers/LargeContainer.jsx';
 
-function Main({ children }) {
+const Main = forwardRef(({ children, ...props }, ref) => {
     return (
         <main className="h-full">
-            <LargeContainer className="h-full flex flex-col py-4 px-3">
+            <LargeContainer ref={ref} {...props} className="h-full flex flex-col py-4 px-3">
                 {children}
             </LargeContainer>
         </main>
     )
-}
+});
 
-export default Main
+export default Main;
