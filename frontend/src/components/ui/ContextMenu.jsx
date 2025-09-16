@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useMenuContext } from '../../contexts/MenuContext';
 
 function useIsMobile() {
@@ -141,13 +141,13 @@ function ContextMenu({children, actionElement, borderElementRef}) {
             const diff = touchY - touchStartY;
 
             if (diff > 0) {
-                setSwipeOffset(diff * 0.8);
+                setSwipeOffset(diff * 1.5);
             }
         }
     };
 
     const handleTouchEnd = () => {
-        if (swipeOffset > 40) {
+        if (swipeOffset > 50) {
             setOpenMenuKey(null);
         }
 
