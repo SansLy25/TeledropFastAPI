@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import Header from "../components/layout/Header.jsx";
 import Main from "../components/layout/Main.jsx";
 import Navigation from "../components/layout/Navigation.jsx";
@@ -24,6 +24,8 @@ import ContextMenuItemGroup from "../components/ui/ContextMenu/ContextMenuItemGr
 function Files() {
 
     let borderMenuComponentRef = useRef(null)
+    let [currentSort, setSort] = useState("type")
+    let [currentSortOrder, setSortOrder] = useState("ascending")
 
     return (
         <div className="flex flex-col dark:bg-neutral-950 h-screen w-screen p-2 py-2 gap-2.5">
@@ -76,7 +78,7 @@ function Files() {
                                     />
                                     <ContextMenuItem
                                         text="Дате"
-                                        Icon={<Calendar width={"23px"} height={"35px"}/>}
+                                        Icon={<Calendar width={"23px"} height={"23px"}/>}
                                     />
 
                                 </ContextMenuItemGroup>

@@ -172,7 +172,6 @@ function ContextMenu({children, actionElement, borderElementRef}) {
                 visibility: isOpened && positionCalculated ? 'visible' : 'hidden',
                 transform: swipeOffset > 0 ? `translateY(${swipeOffset}px)` : 'none',
                 opacity: swipeOpacity,
-                height: '50%',
                 boxShadow: swipeOffset > 0 ? 'none' : '0 -4px 12px rgba(0, 0, 0, 0.1)'
             };
         } else {
