@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useMenuContext } from '../../contexts/MenuContext';
+import { useMenuContext } from '../../../contexts/MenuContext.jsx';
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
@@ -186,7 +186,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     };
 
     const getMenuClassName = () => {
-        const baseClasses = 'dark:bg-neutral-900 text-white dark:border-[1.3px] dark:border-neutral-800';
+        const baseClasses = 'dark:bg-neutral-900 text-white dark:border-[1.3px] p-5 dark:border-neutral-800';
         const transitionClasses = swipeOffset > 0 ? 'transition-transform' : 'transition-all duration-300 ease-in-out';
 
         const desktopStateClasses = isOpened && positionCalculated

@@ -28,7 +28,7 @@ function Navigation() {
     ]
     return (
         <LargeContainer className="flex justify-center gap-10 align-middle h-[5.5rem]">
-            {NAVIGATION_ITEMS.map((item) => (<NavigationItem {...item} />))}
+            {NAVIGATION_ITEMS.map((item, i) => (<NavigationItem key={i} {...item} />))}
         </LargeContainer>
     )
 }
