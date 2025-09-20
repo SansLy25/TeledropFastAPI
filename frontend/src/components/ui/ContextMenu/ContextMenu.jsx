@@ -200,7 +200,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
         if (isMobile) {
             return `${baseClasses} ${transitionClasses} ${mobileStateClasses} fixed bottom-0 left-0 right-0 w-full rounded-t-2xl overflow-auto`;
         } else {
-            return `${baseClasses} ${transitionClasses} ${desktopStateClasses} absolute w-60 h-96 rounded-2xl`;
+            return `${baseClasses} ${transitionClasses} ${desktopStateClasses} absolute w-60 rounded-2xl`;
         }
     };
 

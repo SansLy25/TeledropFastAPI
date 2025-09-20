@@ -61,7 +61,7 @@ function Files() {
                                         Icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
                                     />
                                 </ContextMenuItemGroup>
-                                <ContextMenuItemGroup>
+                                <ContextMenuItemGroup isLast={true}>
                                     <ContextMenuItem
                                         text="Типу"
                                         Icon={<TypeIcon width={"23px"} height={"23px"}/>}
