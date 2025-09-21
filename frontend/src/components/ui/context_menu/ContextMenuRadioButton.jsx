@@ -3,9 +3,9 @@ import ContextMenuItem from "./ContextMenuItem.jsx";
 import {MenuRadioContext} from "./ContextMenuRadioGroup.jsx"
 
 function ContextMenuRadioButton({value, ...props}) {
-    const {currentValue, setValue} = useContext(MenuRadioContext);
+    const {currentValue, onChange} = useContext(MenuRadioContext);
 
-    return <ContextMenuItem active={value === currentValue} onClick={() => setValue(value)} {...props}/>
+    return <ContextMenuItem active={value === currentValue} onClick={() => onChange(value)} {...props}/>
 }
 
 export default ContextMenuRadioButton

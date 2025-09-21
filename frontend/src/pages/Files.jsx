@@ -13,13 +13,12 @@ import {
     Database,
     BookA,
     Calendar,
-    FileType, TypeIcon
+    TypeIcon
 } from "lucide-react";
 import ContextMenu from "../components/ui/context_menu/ContextMenu.jsx";
 import ContextMenuItem from "../components/ui/context_menu/ContextMenuItem.jsx";
 import BorderButton from "../components/ui/button/BorderButton.jsx";
 import ListFileView from "../components/files/ListFileView.jsx";
-import ContextMenuItemGroup from "../components/ui/context_menu/ContextMenuItemGroup.jsx";
 import ContextMenuRadioGroup from "../components/ui/context_menu/ContextMenuRadioGroup.jsx";
 import ContextMenuRadioButton from "../components/ui/context_menu/ContextMenuRadioButton.jsx";
 
@@ -39,9 +38,7 @@ function Files() {
                     </div>
                     <div className="flex flex-row justify-between mt-[0.5rem]">
                         <div className="flex flex-row items-center gap-2">
-                            <button onClick={(e) => {
-                                alert("клик")
-                            }} className="flex items-center justify-center ml-[-0.2rem]">
+                            <button className="flex items-center justify-center ml-[-0.2rem]">
                                 <ArrowLeft width={"26px"} height={"26px"}/>
                             </button>
                             <div className="text-xl font-medium">
@@ -54,39 +51,42 @@ function Files() {
                                 borderElementRef={borderMenuComponentRef}
                                 actionElement={<BorderButton><ArrowDownNarrowWide width={"20px"} height={"20px"}/>
                                     <span className="sm:hidden">Сорт.</span>
-                                    <span class="hidden sm:inline">Сортировка</span>
+                                    <span className="hidden sm:inline">Сортировка</span>
                                 </BorderButton>}>
-                                <ContextMenuRadioGroup initialValue="ascending">
+                            <ContextMenuRadioGroup value={currentSortOrder} onChange={setSortOrder}>
+                                <ContextMenuRadioButton
+                                    value="ascending"
+                                    text="По возрастанию"
+                                    icon={<ArrowDown01 width={"30px"} height={"25px"}/>}
+                                />
+                                <ContextMenuRadioButton
+                                    value="descending"
+                                    text="По убыванию"
+                                    icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
+                                />
+                            </ContextMenuRadioGroup>
+                                <ContextMenuRadioGroup value={currentSort} onChange={setSort} isLast={true}>
                                     <ContextMenuRadioButton
-                                        value="ascending"
-                                        text="По возрастанию"
-                                        icon={<ArrowDown01 width={"30px"} height={"25px"}/>}
-                                    />
-                                    <ContextMenuRadioButton
-                                        value="descending"
-                                        text="По убыванию"
-                                        icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
-                                    />
-                                </ContextMenuRadioGroup>
-                                <ContextMenuItemGroup isLast={true}>
-                                    <ContextMenuItem
+                                        value="type"
                                         text="Типу"
                                         icon={<TypeIcon width={"23px"} height={"23px"}/>}
                                     />
-                                    <ContextMenuItem
+                                    <ContextMenuRadioButton
+                                        value="alphabet"
                                         text="Алфавиту"
                                         icon={<BookA width={"23px"} height={"23px"}/>}
                                     />
-                                    <ContextMenuItem
+                                    <ContextMenuRadioButton
+                                        value="size"
                                         text="Размеру"
                                         icon={<Database width={"23px"} height={"23px"}/>}
                                     />
-                                    <ContextMenuItem
+                                    <ContextMenuRadioButton
+                                        value="date"
                                         text="Дате"
                                         icon={<Calendar width={"23px"} height={"23px"}/>}
                                     />
-
-                                </ContextMenuItemGroup>
+                                </ContextMenuRadioGroup>
                             </ContextMenu>
                             <ContextMenu borderElementRef={borderMenuComponentRef}
                                          actionElement={<BorderButton><Grip width={"20px"} height={"20px"}/>
