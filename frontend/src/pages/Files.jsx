@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import ContextMenu from "../components/ui/context_menu/ContextMenu.jsx";
 import ContextMenuItem from "../components/ui/context_menu/ContextMenuItem.jsx";
-import BorderButton from "../components/ui/BorderButton.jsx";
+import BorderButton from "../components/ui/button/BorderButton.jsx";
 import ListFileView from "../components/files/ListFileView.jsx";
 import ContextMenuItemGroup from "../components/ui/context_menu/ContextMenuItemGroup.jsx";
 import ContextMenuRadioGroup from "../components/ui/context_menu/ContextMenuRadioGroup.jsx";
