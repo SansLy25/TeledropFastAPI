@@ -53,8 +53,8 @@ function Files() {
                             <ContextMenu
                                 borderElementRef={borderMenuComponentRef}
                                 actionElement={<BorderButton><ArrowDownNarrowWide width={"20px"} height={"20px"}/>
-                                    <span className="md:hidden">Сорт.</span>
-                                    <span class="hidden md:inline">Сортировка</span>
+                                    <span className="sm:hidden">Сорт.</span>
+                                    <span class="hidden sm:inline">Сортировка</span>
                                 </BorderButton>}>
                                 <ContextMenuRadioGroup initialValue="ascending">
                                     <ContextMenuRadioButton

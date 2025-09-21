@@ -183,14 +183,13 @@ function ContextMenu({children, actionElement, borderElementRef}) {
                 top: (+actionElementSize.height + 5) + 'px',
                 left: menuPosition.left + 'px',
                 zIndex: 9999,
-                // Скрываем меню до расчета позиции только при первом открытии
                 visibility: isOpened && !positionCalculated && isFirstOpen ? 'hidden' : 'visible'
             };
         }
     };
 
     const getMenuClassName = () => {
-        const baseClasses = 'dark:bg-neutral-900 text-white dark:border-[1.3px] p-5 dark:border-neutral-800';
+        const baseClasses = 'dark:bg-neutral-900 shadow-md drop-shadow-md text-white dark:border-[1.3px] p-5 dark:border-neutral-800';
         const transitionClasses = swipeOffset > 0 ? 'transition-transform' : 'transition-all duration-300 ease-in-out';
 
         const desktopStateClasses = isOpened && (positionCalculated || !isFirstOpen)
