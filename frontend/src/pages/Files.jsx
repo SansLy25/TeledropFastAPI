@@ -15,11 +15,13 @@ import {
     Calendar,
     FileType, TypeIcon
 } from "lucide-react";
-import ContextMenu from "../components/ui/ContextMenu/ContextMenu.jsx";
-import ContextMenuItem from "../components/ui/ContextMenu/ContextMenuItem.jsx";
+import ContextMenu from "../components/ui/context_menu/ContextMenu.jsx";
+import ContextMenuItem from "../components/ui/context_menu/ContextMenuItem.jsx";
 import BorderButton from "../components/ui/BorderButton.jsx";
 import ListFileView from "../components/files/ListFileView.jsx";
-import ContextMenuItemGroup from "../components/ui/ContextMenu/ContextMenuItemGroup.jsx";
+import ContextMenuItemGroup from "../components/ui/context_menu/ContextMenuItemGroup.jsx";
+import ContextMenuRadioGroup from "../components/ui/context_menu/ContextMenuRadioGroup.jsx";
+import ContextMenuRadioButton from "../components/ui/context_menu/ContextMenuRadioButton.jsx";
 
 function Files() {
 
@@ -51,34 +53,37 @@ function Files() {
                             <ContextMenu
                                 borderElementRef={borderMenuComponentRef}
                                 actionElement={<BorderButton><ArrowDownNarrowWide width={"20px"} height={"20px"}/>
-                                    <div>Сорт.</div>
+                                    <span className="md:hidden">Сорт.</span>
+                                    <span class="hidden md:inline">Сортировка</span>
                                 </BorderButton>}>
-                                <ContextMenuItemGroup>
-                                    <ContextMenuItem
+                                <ContextMenuRadioGroup initialValue="ascending">
+                                    <ContextMenuRadioButton
+                                        value="ascending"
                                         text="По возрастанию"
-                                        Icon={<ArrowDown01 width={"30px"} height={"25px"}/>}
+                                        icon={<ArrowDown01 width={"30px"} height={"25px"}/>}
                                     />
-                                    <ContextMenuItem
+                                    <ContextMenuRadioButton
+                                        value="descending"
                                         text="По убыванию"
-                                        Icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
+                                        icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
                                     />
-                                </ContextMenuItemGroup>
+                                </ContextMenuRadioGroup>
                                 <ContextMenuItemGroup isLast={true}>
                                     <ContextMenuItem
                                         text="Типу"
-                                        Icon={<TypeIcon width={"23px"} height={"23px"}/>}
+                                        icon={<TypeIcon width={"23px"} height={"23px"}/>}
                                     />
                                     <ContextMenuItem
                                         text="Алфавиту"
-                                        Icon={<BookA width={"23px"} height={"23px"}/>}
+                                        icon={<BookA width={"23px"} height={"23px"}/>}
                                     />
                                     <ContextMenuItem
                                         text="Размеру"
-                                        Icon={<Database width={"23px"} height={"23px"}/>}
+                                        icon={<Database width={"23px"} height={"23px"}/>}
                                     />
                                     <ContextMenuItem
                                         text="Дате"
-                                        Icon={<Calendar width={"23px"} height={"23px"}/>}
+                                        icon={<Calendar width={"23px"} height={"23px"}/>}
                                     />
 
                                 </ContextMenuItemGroup>

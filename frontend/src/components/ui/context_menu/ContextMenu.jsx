@@ -25,6 +25,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     const [positionCalculated, setPositionCalculated] = useState(false);
     const [touchStartY, setTouchStartY] = useState(null);
     const [swipeOffset, setSwipeOffset] = useState(0);
+    const [isFirstOpen, setIsFirstOpen] = useState(true);
     const actionElementRef = useRef(null);
     const { openMenuKey, setOpenMenuKey } = useMenuContext();
     const isMobile = useIsMobile();
@@ -43,6 +44,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     function onActionElementClick() {
         if (openMenuKey === keyRef.current) {
             setOpenMenuKey(null);
+            setIsFirstOpen(false);
         } else {
             setOpenMenuKey(keyRef.current);
         }
@@ -54,7 +56,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     });
 
     useEffect(() => {
-        if (actionElementRef.current) {
+        if (actionElementRef.current && isOpened) {
             const { offsetWidth, offsetHeight } = actionElementRef.current;
             setActionElementSize({ width: offsetWidth, height: offsetHeight });
         }
@@ -117,6 +119,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
                 !actionElementRef.current.contains(e.target)
             ) {
                 setOpenMenuKey(null);
+                setIsFirstOpen(false);
             }
         }
 
@@ -149,6 +152,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     const handleTouchEnd = () => {
         if (swipeOffset > 50) {
             setOpenMenuKey(null);
+            setIsFirstOpen(false);
         }
 
         setTouchStartY(null);
@@ -159,7 +163,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
 
     const getMenuStyle = () => {
         if (isMobile) {
-            const swipeOpacity = swipeOffset > 0 
+            const swipeOpacity = swipeOffset > 0
                 ? Math.max(1 - (swipeOffset / 200), 0.5)
                 : 1;
 
@@ -179,7 +183,8 @@ function ContextMenu({children, actionElement, borderElementRef}) {
                 top: (+actionElementSize.height + 5) + 'px',
                 left: menuPosition.left + 'px',
                 zIndex: 9999,
-                visibility: isOpened && !positionCalculated ? 'hidden' : 'visible'
+                // Скрываем меню до расчета позиции только при первом открытии
+                visibility: isOpened && !positionCalculated && isFirstOpen ? 'hidden' : 'visible'
             };
         }
     };
@@ -188,12 +193,12 @@ function ContextMenu({children, actionElement, borderElementRef}) {
         const baseClasses = 'dark:bg-neutral-900 text-white dark:border-[1.3px] p-5 dark:border-neutral-800';
         const transitionClasses = swipeOffset > 0 ? 'transition-transform' : 'transition-all duration-300 ease-in-out';
 
-        const desktopStateClasses = isOpened && positionCalculated
-            ? "opacity-100 translate-y-0 scale-100" 
+        const desktopStateClasses = isOpened && (positionCalculated || !isFirstOpen)
+            ? "opacity-100 translate-y-0 scale-100"
             : "opacity-0 translate-y-1 scale-95 pointer-events-none";
 
         const mobileStateClasses = isOpened && positionCalculated
-            ? "opacity-100 translate-y-0" 
+            ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-full pointer-events-none";
 
         if (isMobile) {
