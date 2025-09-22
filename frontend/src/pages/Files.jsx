@@ -16,7 +16,7 @@ import {
     TypeIcon
 } from "lucide-react";
 import ContextMenu from "../components/ui/context_menu/ContextMenu.jsx";
-import ContextMenuItem from "../components/ui/context_menu/ContextMenuItem.jsx";
+import ContextMenuButton from "../components/ui/context_menu/ContextMenuButton.jsx";
 import BorderButton from "../components/ui/button/BorderButton.jsx";
 import ListFileView from "../components/files/ListFileView.jsx";
 import ContextMenuRadioGroup from "../components/ui/context_menu/ContextMenuRadioGroup.jsx";
@@ -57,12 +57,12 @@ function Files() {
                                 <ContextMenuRadioButton
                                     value="ascending"
                                     text="По возрастанию"
-                                    icon={<ArrowDown01 width={"30px"} height={"25px"}/>}
+                                    icon={<ArrowDown01 width={"23px"} height={"23px"}/>}
                                 />
                                 <ContextMenuRadioButton
                                     value="descending"
                                     text="По убыванию"
-                                    icon={<ArrowUp01 width={"30px"} height={"25px"}/>}
+                                    icon={<ArrowUp01 width={"23px"} height={"23px"}/>}
                                 />
                             </ContextMenuRadioGroup>
                                 <ContextMenuRadioGroup value={currentSort} onChange={setSort} isLast={true}>
@@ -70,11 +70,6 @@ function Files() {
                                         value="type"
                                         text="Типу"
                                         icon={<TypeIcon width={"23px"} height={"23px"}/>}
-                                    />
-                                    <ContextMenuRadioButton
-                                        value="alphabet"
-                                        text="Алфавиту"
-                                        icon={<BookA width={"23px"} height={"23px"}/>}
                                     />
                                     <ContextMenuRadioButton
                                         value="size"
@@ -86,13 +81,18 @@ function Files() {
                                         text="Дате"
                                         icon={<Calendar width={"23px"} height={"23px"}/>}
                                     />
+                                    <ContextMenuRadioButton
+                                        value="alphabet"
+                                        text="Алфавиту"
+                                        icon={<BookA width={"23px"} height={"23px"}/>}
+                                    />
                                 </ContextMenuRadioGroup>
                             </ContextMenu>
                             <ContextMenu borderElementRef={borderMenuComponentRef}
                                          actionElement={<BorderButton><Grip width={"20px"} height={"20px"}/>
                                              <div>Вид</div>
                                          </BorderButton>}>
-                                <ContextMenuItem text="Кнопка"/>
+                                <ContextMenuButton text="Кнопка"/>
                             </ContextMenu>
                         </div>
                     </div>

@@ -189,7 +189,7 @@ function ContextMenu({children, actionElement, borderElementRef}) {
     };
 
     const getMenuClassName = () => {
-        const baseClasses = 'dark:bg-neutral-900 shadow-md drop-shadow-md text-white dark:border-[1.3px] p-5 dark:border-neutral-800';
+        const baseClasses = 'dark:bg-neutral-900 shadow-md drop-shadow-md text-white dark:border-[1.3px] py-2 px-2 dark:border-neutral-800';
         const transitionClasses = swipeOffset > 0 ? 'transition-transform' : 'transition-all duration-300 ease-in-out';
 
         const desktopStateClasses = isOpened && (positionCalculated || !isFirstOpen)
